@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  # `main` only. Running on every branch as well looks like more coverage but
+  # is not: a push to a branch with an open PR fires BOTH events, and the
+  # concurrency group below then cancels one of them. GitHub counts that
+  # cancelled run against the pull request's status rollup, so a perfectly
+  # green PR reports as unstable — and, worse, it makes "require status
+  # checks" unusable as a merge rule, because a cancelled check never passes.
+  #
+  # A branch push with no PR is therefore not built here. That is deliberate:
+  # `scripts/ci-local.sh` runs exactly these checks before you push, and the
+  # moment a PR exists this workflow covers it.
+  push:
+    branches: [main]
+
+  # Covers every pull request, including from forks — a fork's push event
+  # never reaches this repository, so this is the only way their work is
+  # tested before merge.
+  pull_request:
+    branches: [main]
+
+  workflow_dispatch:
+
+# Superseded runs on the same branch are pointless once a newer commit exists.
+# With the duplicate gone, this now only cancels a genuinely stale run — a
+# second push to a PR while the first is still building.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build and test
+    # The FoundationModels framework is only in the macOS 26 / Xcode 26 SDK —
+    # code that references it (even behind `#available`) needs that SDK to
+    # compile at all. macos-15 does not have it.
+    runs-on: macos-26
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v5
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      # Code signing is disabled throughout: the runner has no keychain
+      # identity, and nothing here needs entitlements that require a real one.
+      #
+      # Warnings are treated as errors because CONTRIBUTING requires the build
+      # to stay warning-free. CI that does not enforce a documented rule is
+      # decoration. If a future SDK deprecation makes this impractical, drop
+      # SWIFT_TREAT_WARNINGS_AS_ERRORS rather than quietly ignoring warnings.
+      - name: Build
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project QuoteBar.xcodeproj \
+            -scheme QuoteBar \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            SWIFT_TREAT_WARNINGS_AS_ERRORS=YES \
+            | xcpretty
+
+      - name: Test
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project QuoteBar.xcodeproj \
+            -scheme QuoteBar \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            -resultBundlePath TestResults.xcresult \
+            | xcpretty
+
+      # Only on failure: the result bundle carries the failing assertions and
+      # is large enough not to be worth keeping for green runs.
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ github.run_id }}
+          path: TestResults.xcresult
+          retention-days: 7

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- The app is sandboxed. Unlike its sibling idle-tapper-macos, QuoteBar has
+	     no auto-updater that needs to replace its own bundle in /Applications,
+	     so there is no reason to turn the sandbox off. -->
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+
+	<!-- Fetching a quote from ZenQuotes or DummyJSON when the on-device model is
+	     unavailable. See SECURITY.md for exactly what these requests carry. -->
+	<key>com.apple.security.network.client</key>
+	<true/>
+</dict>
+</plist>

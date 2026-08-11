@@ -1,0 +1,186 @@
+//
+//  MenuBarController.swift
+//  QuoteBar — Menu bar presentation
+//
+//  Owns the `NSStatusItem` and the popover that hosts the SwiftUI interface.
+//  AppKit rather than `MenuBarExtra` because the popover needs precise control
+//  over dismissal and over how an accessory app takes focus. Mirrors
+//  idle-tapper-macos's `MenuBarController`.
+//
+
+import AppKit
+import SwiftUI
+
+@MainActor
+final class MenuBarController {
+
+    private let tracker: QuoteTracker
+    private let windowCoordinator: WindowCoordinator
+
+    private var statusItem: NSStatusItem?
+    private var popover: NSPopover?
+
+    /// Monitors clicks outside the popover so it dismisses like a menu.
+    private lazy var outsideClickMonitor = EventMonitor(
+        mask: [.leftMouseDown, .rightMouseDown]
+    ) { [weak self] _ in
+        MainActor.assumeIsolated {
+            self?.closePopover()
+        }
+    }
+
+    /// Timestamp of the last popover close. Clicking the status item while the
+    /// popover is open both dismisses it and fires the click handler again,
+    /// which would immediately reopen it; ignoring a click within a few
+    /// milliseconds of a close fixes that.
+    private var lastCloseDate: Date = .distantPast
+
+    init(tracker: QuoteTracker, settings: AppSettings, launchAtLogin: LaunchAtLoginService) {
+        self.tracker = tracker
+        self.windowCoordinator = WindowCoordinator(
+            tracker: tracker,
+            settings: settings,
+            launchAtLogin: launchAtLogin
+        )
+    }
+
+    func install() {
+        let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+
+        guard let button = item.button else {
+            AppLog.menuBar.error("[MenuBar] Status item has no button — cannot install")
+            return
+        }
+
+        button.image = StatusItemRenderer.image
+        button.toolTip = StatusItemRenderer.symbolDescription
+        button.target = self
+        button.action = #selector(statusItemClicked)
+        button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+
+        statusItem = item
+        AppLog.menuBar.info("[MenuBar] Status item installed")
+    }
+
+    // MARK: - Actions
+
+    @objc private func statusItemClicked() {
+        guard let event = NSApp.currentEvent else {
+            togglePopover()
+            return
+        }
+
+        let isSecondaryClick = event.type == .rightMouseUp || event.modifierFlags.contains(.control)
+
+        if isSecondaryClick {
+            showContextMenu()
+        } else {
+            togglePopover()
+        }
+    }
+
+    private func togglePopover() {
+        guard let button = statusItem?.button else { return }
+
+        if let popover, popover.isShown {
+            closePopover()
+            return
+        }
+
+        guard Date().timeIntervalSince(lastCloseDate) > 0.2 else { return }
+        showPopover(from: button)
+    }
+
+    private func showPopover(from button: NSStatusBarButton) {
+        tracker.refresh()
+
+        let popover = popover ?? makePopover()
+        self.popover = popover
+
+        popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+
+        // An accessory app is not frontmost by default; without this the
+        // popover renders inactive.
+        NSApp.activate(ignoringOtherApps: true)
+
+        outsideClickMonitor.start()
+        AppLog.menuBar.debug("[MenuBar] Popover shown")
+    }
+
+    private func closePopover() {
+        popover?.performClose(nil)
+        lastCloseDate = Date()
+        outsideClickMonitor.stop()
+        tracker.flush()
+        AppLog.menuBar.debug("[MenuBar] Popover closed")
+    }
+
+    private func showContextMenu() {
+        guard let statusItem else { return }
+
+        let menu = NSMenu()
+
+        menu.addItem(withTitle: "New Quote", action: #selector(requestNewQuoteFromMenu), keyEquivalent: "n")
+            .target = self
+        menu.addItem(.separator())
+        menu.addItem(withTitle: "History…", action: #selector(openHistory), keyEquivalent: "")
+            .target = self
+        menu.addItem(withTitle: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
+            .target = self
+        menu.addItem(.separator())
+        menu.addItem(withTitle: "Quit QuoteBar", action: #selector(quit), keyEquivalent: "q")
+            .target = self
+
+        // Attaching the menu makes the status item present it, then detaching
+        // restores normal click-to-toggle behaviour.
+        statusItem.menu = menu
+        statusItem.button?.performClick(nil)
+        statusItem.menu = nil
+    }
+
+    @objc private func requestNewQuoteFromMenu() {
+        Task { await tracker.requestNewQuote() }
+    }
+
+    @objc private func openHistory() {
+        windowCoordinator.showHistory()
+    }
+
+    @objc private func openSettings() {
+        windowCoordinator.showSettings()
+    }
+
+    @objc private func quit() {
+        tracker.flush()
+        NSApp.terminate(nil)
+    }
+
+    // MARK: - Popover Content
+
+    private func makePopover() -> NSPopover {
+        let popover = NSPopover()
+        popover.behavior = .transient
+        popover.animates = true
+
+        let content = PopoverContentView(
+            tracker: tracker,
+            onOpenHistory: { [weak self] in
+                self?.closePopover()
+                self?.windowCoordinator.showHistory()
+            },
+            onOpenSettings: { [weak self] in
+                self?.closePopover()
+                self?.windowCoordinator.showSettings()
+            },
+            onQuit: { [weak self] in
+                self?.quit()
+            }
+        )
+
+        let hosting = NSHostingController(rootView: content)
+        hosting.sizingOptions = [.preferredContentSize]
+        popover.contentViewController = hosting
+
+        return popover
+    }
+}
