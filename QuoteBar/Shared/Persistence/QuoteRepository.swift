@@ -55,3 +55,17 @@ protocol QuoteRepository: AnyObject {
     /// Write any pending changes to disk immediately.
     func flush() throws
 }
+
+extension QuoteRepository {
+    /// Convenience: record a quote as seen right now.
+    ///
+    /// A default argument on the protocol requirement itself would not be
+    /// visible through an `any QuoteRepository` existential — Swift resolves
+    /// default parameter values statically, not dynamically — so this is a
+    /// real overload instead, the same fix idle-tapper-macos's `TapRepository`
+    /// uses for `recordTap(at:)`.
+    @discardableResult
+    func record(_ quote: Quote) throws -> QuoteSnapshot {
+        try record(quote, seenAt: Date())
+    }
+}
