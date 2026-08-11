@@ -25,11 +25,14 @@ struct RecentQuoteFilterTests {
 
     @Test("Exclusion is case-insensitive")
     func exclusionIsCaseInsensitive() {
-        let candidates = [TestSupport.quote(text: "Hello World")]
+        // A second, non-matching candidate keeps this test clear of the
+        // all-excluded fallback exercised separately below — this test is
+        // specifically about case-insensitive matching, not the fallback.
+        let candidates = [TestSupport.quote(text: "Hello World"), TestSupport.quote(text: "Something else")]
 
         let filtered = RecentQuoteFilter.excludingRecent(candidates, recentTexts: ["hello world"])
 
-        #expect(filtered.isEmpty)
+        #expect(filtered.map(\.text) == ["Something else"])
     }
 
     @Test("Falls back to the full pool when every candidate was recently seen")
