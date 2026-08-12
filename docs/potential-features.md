@@ -25,3 +25,11 @@ Let users export their full quote history (and, once it exists, their imported/c
 ## Bulk-delete for imported quotes
 
 Once users can add their own quotes, they'll want to prune them in bulk rather than one at a time. Non-trivial part: needs a selection UI in a currently single-item-focused history view, and a repository method that removes many `QuoteRecord`s in one transaction rather than N individual deletes.
+
+## CSV export of the custom quote library
+
+The custom/imported quotes feature added JSON/CSV import (`CustomQuoteImportParsing`) but no matching export — users can add or import quotes but have no way to get their library back out, e.g. to back it up or move it to another Mac before iCloud sync exists. Non-trivial part: needs a serializer that's the mirror image of the CSV import parser (same quoting/escaping rules, so a round-tripped file re-imports identically), and pairs naturally with the already-backlogged "Export/backup of quote history" — likely worth building as one combined export feature rather than two.
+
+## Live duplicate feedback in the "Add Quote" form
+
+`CustomQuotesEditor`'s manual add form only reports a duplicate after the user clicks "Add" and the repository throws — the check happens server-side (in `SwiftDataCustomQuoteRepository.add`), not as the user types. Non-trivial part: `CustomQuoteDeduplicator` is already a pure function, so the calculation itself is cheap to call on every keystroke; the real work is deciding how much of `CustomQuoteLibrary.entries` (already loaded) versus the bundled set (currently only read inside the repository, via `BundledQuoteProvider.allTexts`) needs to be threaded into the view layer without violating "views are presentational."
