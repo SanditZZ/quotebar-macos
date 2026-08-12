@@ -33,3 +33,27 @@ Both "Your Quotes" and the new "Backup" section only accept files via an explici
 ## "Last backup" timestamp in Settings
 
 `QuoteBackupService` currently reports only a one-line summary immediately after an export/import ("Exported N quotes as JSON."), which disappears the next time Settings is reopened — there's no persistent way to tell whether (or how long ago) a backup was last made. Non-trivial part: needs a new `AppSettings` field for the last export date, but has to be careful about *when* it's considered "backed up" — an export the user cancelled partway through the save panel shouldn't count, so it can only be set from `.fileExporter`'s `.success` completion, not from `makeJSONExportData()` being called.
+
+## Set quote as desktop wallpaper
+
+Reuse the existing `QuoteImageRenderer`/`ShareCardStyle` pipeline (built for sharing) to render the current quote and set it as the desktop picture instead of just sharing it. Non-trivial part: a sandboxed app can't call `NSWorkspace.setDesktopImageURL` on an arbitrary path — the rendered image has to be written to a location the app can pass a `file://` URL for (e.g. its own container's `Application Support`), and multi-display setups mean iterating `NSScreen.screens` rather than assuming a single screen.
+
+## Read quote aloud
+
+An accessibility/hands-free option using `AVSpeechSynthesizer` to read the current card's text and author. Non-trivial part: needs a new speak/stop action and state (`isSpeaking`) in `QuoteTracker` that doesn't block `requestNewQuote()`, a voice-selection setting in `AppSettings`, and a decision on whether speech auto-cancels when the popover closes or a new quote is fetched mid-utterance.
+
+## Menu bar marquee text mode
+
+A toggle to show a short excerpt of the quote directly in the menu bar (as title text next to or instead of the icon), not just an icon. Non-trivial part: `StatusItemRenderer` is icon-only today; adding text means truncation/ellipsis logic, correct `NSStatusItem` auto-resizing, and refreshing the title whenever `QuoteTracker.currentQuote` changes even while the popover is closed — nothing currently observes the tracker outside SwiftUI views.
+
+## "On this day" favorites resurfacing
+
+Occasionally show a favorite from N days (or a year) ago instead of fetching new, framed as a memory rather than a fresh quote. Non-trivial part: `QuoteRepository` only exposes `recentTexts`/`allQuotes`/`toggleFavorite` today — this needs a new date-range query, plus a policy for how it competes with `QuoteProviderService`'s chain, which is currently strictly additive tiers, not a branching decision.
+
+## Favorites-only rotation mode
+
+A "Favorites Mode" toggle that serves only from the user's already-favorited quotes, as a quieter alternative to pinning `preferredSource: .custom`. Non-trivial part: this is a rotation over *history* (favorited `QuoteRecord`s), not a `QuoteProvider` tier, so it doesn't fit `ProviderChainSelector`'s source-based model — it needs its own path in `QuoteTracker.requestNewQuote()` that bypasses the provider chain entirely and dedups via `RecentQuoteFilter` differently, since there's no live "provider" backing it.
+
+## Quick actions from the menu bar right-click menu
+
+Extend the right-click `NSMenu` in `MenuBarController` with "Copy Quote", "Favorite This Quote", and "Read Aloud" so common actions don't require opening the popover at all. Non-trivial part: `showContextMenu()` currently rebuilds the menu synchronously from `tracker.currentQuote`, but favoriting/copying needs to update state and (for copy) write to `NSPasteboard` while respecting the same `isFetching`/error-message invariants `PopoverContentView` already encodes — duplicating that logic outside SwiftUI risks it drifting out of sync with the view's behavior.
