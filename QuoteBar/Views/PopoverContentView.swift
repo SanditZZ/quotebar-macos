@@ -33,6 +33,14 @@ struct PopoverContentView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
 
+            if let fallbackMessage = tracker.pinnedSourceFallbackMessage {
+                Text(fallbackMessage)
+                    .font(DesignTokens.Typography.caption)
+                    .foregroundStyle(AppColors.warning)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
             if tracker.isEphemeral {
                 Label("History isn't being saved right now.", systemImage: "exclamationmark.triangle")
                     .font(DesignTokens.Typography.caption)
@@ -81,6 +89,7 @@ struct PopoverContentView: View {
         tracker: QuoteTracker(
             repository: SwiftDataQuoteRepository(container: try! ModelContainerFactory.makeInMemory()),
             provider: QuoteProviderService(),
+            settings: AppSettings(defaults: UserDefaults(suiteName: "preview")!),
             isEphemeral: false
         ),
         onOpenHistory: {},

@@ -102,6 +102,7 @@ struct HistoryView: View {
         tracker: QuoteTracker(
             repository: SwiftDataQuoteRepository(container: try! ModelContainerFactory.makeInMemory()),
             provider: QuoteProviderService(),
+            settings: AppSettings(defaults: UserDefaults(suiteName: "preview")!),
             isEphemeral: false
         ),
         settings: AppSettings(defaults: UserDefaults(suiteName: "preview")!)

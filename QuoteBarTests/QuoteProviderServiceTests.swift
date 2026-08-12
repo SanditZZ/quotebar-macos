@@ -28,7 +28,7 @@ struct QuoteProviderServiceTests {
             bundled: BundledQuoteProvider()
         )
 
-        let quote = await service.nextQuote(recentTexts: [])
+        let quote = await service.nextQuote(recentTexts: [], preference: nil)
 
         #expect(quote.source == .onDeviceAI)
         #expect(quote.text == "AI line")
@@ -45,7 +45,7 @@ struct QuoteProviderServiceTests {
             bundled: BundledQuoteProvider()
         )
 
-        let quote = await service.nextQuote(recentTexts: [])
+        let quote = await service.nextQuote(recentTexts: [], preference: nil)
 
         #expect(quote.source == .zenQuotes)
     }
@@ -61,7 +61,7 @@ struct QuoteProviderServiceTests {
             bundled: BundledQuoteProvider()
         )
 
-        let quote = await service.nextQuote(recentTexts: [])
+        let quote = await service.nextQuote(recentTexts: [], preference: nil)
 
         #expect(quote.source == .dummyJSON)
     }
@@ -77,7 +77,7 @@ struct QuoteProviderServiceTests {
             bundled: BundledQuoteProvider()
         )
 
-        let quote = await service.nextQuote(recentTexts: [])
+        let quote = await service.nextQuote(recentTexts: [], preference: nil)
 
         #expect(quote.source == .bundled)
     }
@@ -92,9 +92,57 @@ struct QuoteProviderServiceTests {
             bundled: BundledQuoteProvider()
         )
 
-        let quote = await service.nextQuote(recentTexts: ["Already Seen"]) // case-insensitive match
+        let quote = await service.nextQuote(recentTexts: ["Already Seen"], preference: nil) // case-insensitive match
 
         #expect(quote.source == .zenQuotes)
         #expect(quote.text == "Fresh one")
+    }
+
+    @Test("A pinned source that succeeds is served, skipping every other tier")
+    func pinnedSourceIsServedWhenItSucceeds() async {
+        let service = QuoteProviderService(
+            onDeviceAI: FakeProvider(source: .onDeviceAI, result: TestSupport.quote(text: "Should not be used", source: .onDeviceAI)),
+            networkProviders: [
+                FakeProvider(source: .zenQuotes, result: TestSupport.quote(text: "Zen line", source: .zenQuotes)),
+                FakeProvider(source: .dummyJSON, result: TestSupport.quote(text: "Should not be used either", source: .dummyJSON)),
+            ],
+            bundled: BundledQuoteProvider()
+        )
+
+        let quote = await service.nextQuote(recentTexts: [], preference: .zenQuotes)
+
+        #expect(quote.source == .zenQuotes)
+        #expect(quote.text == "Zen line")
+    }
+
+    @Test("A pinned source that fails falls straight to bundled, skipping other network tiers")
+    func pinnedSourceFallsThroughToBundledOnly() async {
+        let service = QuoteProviderService(
+            onDeviceAI: FakeProvider(source: .onDeviceAI, result: nil),
+            networkProviders: [
+                FakeProvider(source: .zenQuotes, result: nil),
+                FakeProvider(source: .dummyJSON, result: TestSupport.quote(text: "Should be skipped, not pinned", source: .dummyJSON)),
+            ],
+            bundled: BundledQuoteProvider()
+        )
+
+        let quote = await service.nextQuote(recentTexts: [], preference: .zenQuotes)
+
+        #expect(quote.source == .bundled)
+    }
+
+    @Test("Pinning on-device AI skips both network tiers when it fails")
+    func pinnedOnDeviceAISkipsNetworkTiers() async {
+        let service = QuoteProviderService(
+            onDeviceAI: FakeProvider(source: .onDeviceAI, result: nil),
+            networkProviders: [
+                FakeProvider(source: .zenQuotes, result: TestSupport.quote(text: "Should be skipped, not pinned", source: .zenQuotes)),
+            ],
+            bundled: BundledQuoteProvider()
+        )
+
+        let quote = await service.nextQuote(recentTexts: [], preference: .onDeviceAI)
+
+        #expect(quote.source == .bundled)
     }
 }

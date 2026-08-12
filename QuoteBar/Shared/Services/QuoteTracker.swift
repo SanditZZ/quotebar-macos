@@ -35,10 +35,17 @@ final class QuoteTracker {
     /// held in memory only.
     let isEphemeral: Bool
 
+    /// Set after a fetch when `settings.preferredSource` was pinned but the
+    /// served quote came from a different source — the pin failed silently
+    /// otherwise, which is exactly what a pinned choice must not do. `nil`
+    /// when automatic, or when the pin was honored.
+    private(set) var pinnedSourceFallbackMessage: String?
+
     // MARK: - Dependencies
 
     private let repository: any QuoteRepository
     private let provider: any QuoteProviderServicing
+    private let settings: AppSettings
 
     /// How many recent quotes to avoid repeating.
     private let recentHistoryWindow: Int
@@ -48,11 +55,13 @@ final class QuoteTracker {
     init(
         repository: any QuoteRepository,
         provider: any QuoteProviderServicing,
+        settings: AppSettings,
         isEphemeral: Bool,
         recentHistoryWindow: Int = 10
     ) {
         self.repository = repository
         self.provider = provider
+        self.settings = settings
         self.isEphemeral = isEphemeral
         self.recentHistoryWindow = recentHistoryWindow
         refresh()
@@ -66,8 +75,16 @@ final class QuoteTracker {
         isFetching = true
         defer { isFetching = false }
 
+        let preference = settings.preferredSource
         let recentTexts = (try? repository.recentTexts(limit: recentHistoryWindow)) ?? []
-        let quote = await provider.nextQuote(recentTexts: recentTexts)
+        let quote = await provider.nextQuote(recentTexts: recentTexts, preference: preference)
+
+        if let preference, quote.source != preference {
+            pinnedSourceFallbackMessage =
+                "Pinned to \(preference.displayName), but it wasn't available just now — showing a quote from \(quote.source.displayName) instead."
+        } else {
+            pinnedSourceFallbackMessage = nil
+        }
 
         do {
             let snapshot = try repository.record(quote)
