@@ -10,10 +10,6 @@ Idle Tapper (this project's sibling) ships automatic updates via Sparkle, signed
 
 Let users add their own quotes to the rotation, or import a JSON/CSV file. Non-trivial part: needs de-duplication against the bundled set and a schema migration path in `QuoteRecord` for a `isUserAdded` flag.
 
-## Global keyboard shortcut for "New Quote"
-
-A system-wide hotkey that fetches a new quote without opening the popover — mirrors Idle Tapper's potential-features entry for a global tap shortcut. Non-trivial part: needs a way to surface the new quote (notification banner? menu bar flash?) since there is no guaranteed visible surface if the popover is closed.
-
 ## iCloud sync
 
 Sync quote history and favorites across a user's Macs. Non-trivial part: SwiftData's `CloudKit` integration requires schema constraints (every attribute needs a default or be optional, no unique constraints) that `QuoteRecord` does not currently follow, and favorites conflict resolution needs a policy.
