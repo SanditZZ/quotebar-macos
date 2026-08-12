@@ -39,14 +39,16 @@ final class MenuBarController {
         tracker: QuoteTracker,
         settings: AppSettings,
         launchAtLogin: LaunchAtLoginService,
-        hotKeyService: GlobalHotKeyService
+        hotKeyService: GlobalHotKeyService,
+        customQuoteLibrary: CustomQuoteLibrary
     ) {
         self.tracker = tracker
         self.windowCoordinator = WindowCoordinator(
             tracker: tracker,
             settings: settings,
             launchAtLogin: launchAtLogin,
-            hotKeyService: hotKeyService
+            hotKeyService: hotKeyService,
+            customQuoteLibrary: customQuoteLibrary
         )
     }
 

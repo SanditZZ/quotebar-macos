@@ -13,6 +13,7 @@ struct SettingsView: View {
     var settings: AppSettings
     var launchAtLogin: LaunchAtLoginService
     var hotKeyService: GlobalHotKeyService
+    var customQuoteLibrary: CustomQuoteLibrary
 
     @State private var showingClearConfirmation = false
 
@@ -24,6 +25,7 @@ struct SettingsView: View {
                 generalSection
                 shortcutSection
                 quoteSourceSection
+                yourQuotesSection
                 dataSection
                 aboutSection
             }
@@ -113,6 +115,16 @@ struct SettingsView: View {
             return "Requires a network connection. If the request fails, a quote is still shown from another source, and that's noted on the card."
         case .bundled:
             return "Always available offline — no network or on-device model needed."
+        case .custom:
+            return "Only quotes from your library below. If it's empty, a quote is still shown from another source, and that's noted on the card."
+        }
+    }
+
+    // MARK: - Your Quotes
+
+    private var yourQuotesSection: some View {
+        section(title: "Your Quotes") {
+            CustomQuotesEditor(library: customQuoteLibrary)
         }
     }
 
@@ -207,15 +219,17 @@ struct SettingsView: View {
 }
 
 #Preview {
+    let container = try! ModelContainerFactory.makeInMemory()
     SettingsView(
         tracker: QuoteTracker(
-            repository: SwiftDataQuoteRepository(container: try! ModelContainerFactory.makeInMemory()),
+            repository: SwiftDataQuoteRepository(container: container),
             provider: QuoteProviderService(),
             settings: AppSettings(defaults: UserDefaults(suiteName: "preview")!),
             isEphemeral: false
         ),
         settings: AppSettings(defaults: UserDefaults(suiteName: "preview")!),
         launchAtLogin: LaunchAtLoginService(),
-        hotKeyService: GlobalHotKeyService()
+        hotKeyService: GlobalHotKeyService(),
+        customQuoteLibrary: CustomQuoteLibrary(repository: SwiftDataCustomQuoteRepository(container: container))
     )
 }

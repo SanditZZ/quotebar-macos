@@ -18,6 +18,10 @@ import Foundation
 final class BundledQuoteProvider: QuoteProvider, @unchecked Sendable {
     let source = QuoteSource.bundled
 
+    /// Every bundled quote's text, for checking a custom/imported quote
+    /// against the offline set before it's added — see `CustomQuoteDeduplicator`.
+    static var allTexts: [String] { allQuotes.map(\.text) }
+
     private struct Entry: Decodable {
         let text: String
         let author: String?

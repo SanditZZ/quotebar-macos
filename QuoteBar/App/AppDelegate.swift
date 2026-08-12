@@ -26,7 +26,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             tracker: environment.tracker,
             settings: environment.settings,
             launchAtLogin: environment.launchAtLogin,
-            hotKeyService: environment.hotKeyService
+            hotKeyService: environment.hotKeyService,
+            customQuoteLibrary: environment.customQuoteLibrary
         )
         menuBarController?.install()
 

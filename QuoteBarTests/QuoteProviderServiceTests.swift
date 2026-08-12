@@ -145,4 +145,47 @@ struct QuoteProviderServiceTests {
 
         #expect(quote.source == .bundled)
     }
+
+    @Test("A pin-only provider is never tried in automatic mode")
+    func pinOnlyProviderNeverAutomaticallyTried() async {
+        let service = QuoteProviderService(
+            onDeviceAI: FakeProvider(source: .onDeviceAI, result: nil),
+            networkProviders: [FakeProvider(source: .zenQuotes, result: nil)],
+            pinnedOnlyProviders: [FakeProvider(source: .custom, result: TestSupport.quote(text: "Should never appear automatically", source: .custom))],
+            bundled: BundledQuoteProvider()
+        )
+
+        let quote = await service.nextQuote(recentTexts: [], preference: nil)
+
+        #expect(quote.source == .bundled)
+    }
+
+    @Test("A pin-only provider is served once explicitly pinned")
+    func pinOnlyProviderServedWhenPinned() async {
+        let service = QuoteProviderService(
+            onDeviceAI: FakeProvider(source: .onDeviceAI, result: TestSupport.quote(text: "Should not be used", source: .onDeviceAI)),
+            networkProviders: [],
+            pinnedOnlyProviders: [FakeProvider(source: .custom, result: TestSupport.quote(text: "My own quote", source: .custom))],
+            bundled: BundledQuoteProvider()
+        )
+
+        let quote = await service.nextQuote(recentTexts: [], preference: .custom)
+
+        #expect(quote.source == .custom)
+        #expect(quote.text == "My own quote")
+    }
+
+    @Test("A pinned pin-only provider that fails falls straight to bundled")
+    func pinOnlyProviderFallsThroughToBundledOnFailure() async {
+        let service = QuoteProviderService(
+            onDeviceAI: FakeProvider(source: .onDeviceAI, result: nil),
+            networkProviders: [],
+            pinnedOnlyProviders: [FakeProvider(source: .custom, result: nil)],
+            bundled: BundledQuoteProvider()
+        )
+
+        let quote = await service.nextQuote(recentTexts: [], preference: .custom)
+
+        #expect(quote.source == .bundled)
+    }
 }

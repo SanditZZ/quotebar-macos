@@ -20,7 +20,8 @@ struct QuoteBarApp: App {
                 tracker: AppEnvironment.shared.tracker,
                 settings: AppEnvironment.shared.settings,
                 launchAtLogin: AppEnvironment.shared.launchAtLogin,
-                hotKeyService: AppEnvironment.shared.hotKeyService
+                hotKeyService: AppEnvironment.shared.hotKeyService,
+                customQuoteLibrary: AppEnvironment.shared.customQuoteLibrary
             )
         }
     }

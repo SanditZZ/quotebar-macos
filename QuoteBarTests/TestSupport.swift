@@ -46,4 +46,12 @@ enum TestSupport {
             isFavorite: isFavorite
         )
     }
+
+    static func customQuoteSnapshot(
+        text: String,
+        author: String? = "Test Author",
+        addedAt: Date = referenceDate
+    ) -> CustomQuoteSnapshot {
+        CustomQuoteSnapshot(id: UUID(), text: text, author: author, addedAt: addedAt)
+    }
 }

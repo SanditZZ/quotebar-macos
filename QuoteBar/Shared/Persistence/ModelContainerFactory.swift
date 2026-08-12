@@ -15,7 +15,7 @@ enum ModelContainerFactory {
 
     /// Every `@Model` type the app persists. Adding a model here is all that is
     /// required for it to be included in the schema.
-    static let schema = Schema([QuoteRecord.self])
+    static let schema = Schema([QuoteRecord.self, CustomQuoteEntry.self])
 
     /// Container backed by the on-disk SQLite store.
     ///

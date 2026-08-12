@@ -12,5 +12,12 @@
 	     unavailable. See SECURITY.md for exactly what these requests carry. -->
 	<key>com.apple.security.network.client</key>
 	<true/>
+
+	<!-- Reading a JSON/CSV file the user picks via Settings' "Your Quotes"
+	     import (.fileImporter). A sandboxed app needs this to read a
+	     user-selected file at all — without it, CustomQuoteLibrary.importFile
+	     would fail on every file. -->
+	<key>com.apple.security.files.user-selected.read-only</key>
+	<true/>
 </dict>
 </plist>
