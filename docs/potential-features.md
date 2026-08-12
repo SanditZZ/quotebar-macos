@@ -22,10 +22,6 @@ A macOS widget showing today's quote. Non-trivial part: widgets run in a separat
 
 Let users export their full quote history (and, once it exists, their imported/custom quotes) to a file, and re-import it. Non-trivial part: needs a stable serialization format for `QuoteRecord`/`QuoteSnapshot` chosen up front so it survives schema changes — and doing this before iCloud sync de-risks that later work by proving the format out.
 
-## Bulk-delete for imported quotes
-
-Once users can add their own quotes, they'll want to prune them in bulk rather than one at a time. Non-trivial part: needs a selection UI in a currently single-item-focused history view, and a repository method that removes many `QuoteRecord`s in one transaction rather than N individual deletes.
-
 ## CSV export of the custom quote library
 
 The custom/imported quotes feature added JSON/CSV import (`CustomQuoteImportParsing`) but no matching export — users can add or import quotes but have no way to get their library back out, e.g. to back it up or move it to another Mac before iCloud sync exists. Non-trivial part: needs a serializer that's the mirror image of the CSV import parser (same quoting/escaping rules, so a round-tripped file re-imports identically), and pairs naturally with the already-backlogged "Export/backup of quote history" — likely worth building as one combined export feature rather than two.
