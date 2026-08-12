@@ -104,7 +104,8 @@ struct ShareableQuoteView: View {
             author: "Socrates",
             source: .bundled,
             seenAt: Date(),
-            isFavorite: false
+            isFavorite: false,
+            tags: []
         ),
         style: .midnight
     )
@@ -120,7 +121,8 @@ struct ShareableQuoteView: View {
             author: "Socrates",
             source: .bundled,
             seenAt: Date(),
-            isFavorite: false
+            isFavorite: false,
+            tags: []
         ),
         style: .paper
     )

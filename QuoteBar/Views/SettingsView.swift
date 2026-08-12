@@ -15,6 +15,7 @@ struct SettingsView: View {
     var hotKeyService: GlobalHotKeyService
     var notificationService: QuoteNotificationService
     var customQuoteLibrary: CustomQuoteLibrary
+    var tagLibrary: QuoteTagLibrary
 
     @State private var showingClearConfirmation = false
 
@@ -28,6 +29,7 @@ struct SettingsView: View {
                 notificationsSection
                 quoteSourceSection
                 yourQuotesSection
+                tagsSection
                 sharingSection
                 dataSection
                 aboutSection
@@ -182,6 +184,14 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: - Tags
+
+    private var tagsSection: some View {
+        section(title: "Tags") {
+            TagsEditor(library: tagLibrary)
+        }
+    }
+
     // MARK: - Sharing
 
     private var sharingSection: some View {
@@ -331,6 +341,7 @@ struct SettingsView: View {
         launchAtLogin: LaunchAtLoginService(),
         hotKeyService: GlobalHotKeyService(),
         notificationService: QuoteNotificationService(),
-        customQuoteLibrary: CustomQuoteLibrary(repository: SwiftDataCustomQuoteRepository(container: container))
+        customQuoteLibrary: CustomQuoteLibrary(repository: SwiftDataCustomQuoteRepository(container: container)),
+        tagLibrary: QuoteTagLibrary(repository: SwiftDataQuoteTagRepository(container: container))
     )
 }

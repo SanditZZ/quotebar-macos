@@ -49,6 +49,11 @@ protocol QuoteRepository: AnyObject {
     /// Flip the favorite flag on a sighting.
     func toggleFavorite(id: UUID) throws
 
+    /// Add `tagID` to a sighting's tags if it isn't already there, otherwise
+    /// remove it. Both `quoteID` and `tagID` unknown throw `.notFound` —
+    /// unreachable from normal UI, so not worth distinguishing further.
+    func toggleTag(_ tagID: UUID, onQuote quoteID: UUID) throws
+
     /// Delete all history. Irreversible.
     func deleteAll() throws
 

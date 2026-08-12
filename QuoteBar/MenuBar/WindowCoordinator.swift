@@ -19,6 +19,7 @@ final class WindowCoordinator {
     private let hotKeyService: GlobalHotKeyService
     private let notificationService: QuoteNotificationService
     private let customQuoteLibrary: CustomQuoteLibrary
+    private let tagLibrary: QuoteTagLibrary
 
     private var historyWindow: NSWindow?
     private var settingsWindow: NSWindow?
@@ -29,7 +30,8 @@ final class WindowCoordinator {
         launchAtLogin: LaunchAtLoginService,
         hotKeyService: GlobalHotKeyService,
         notificationService: QuoteNotificationService,
-        customQuoteLibrary: CustomQuoteLibrary
+        customQuoteLibrary: CustomQuoteLibrary,
+        tagLibrary: QuoteTagLibrary
     ) {
         self.tracker = tracker
         self.settings = settings
@@ -37,6 +39,7 @@ final class WindowCoordinator {
         self.hotKeyService = hotKeyService
         self.notificationService = notificationService
         self.customQuoteLibrary = customQuoteLibrary
+        self.tagLibrary = tagLibrary
     }
 
     // MARK: - Actions
@@ -53,7 +56,7 @@ final class WindowCoordinator {
             title: "Quote History",
             size: DesignTokens.Layout.historyWindowSize,
             minSize: DesignTokens.Layout.historyWindowMinSize,
-            content: HistoryView(tracker: tracker, settings: settings)
+            content: HistoryView(tracker: tracker, settings: settings, tagLibrary: tagLibrary)
         )
         historyWindow = window
         present(window)
@@ -77,7 +80,8 @@ final class WindowCoordinator {
                 launchAtLogin: launchAtLogin,
                 hotKeyService: hotKeyService,
                 notificationService: notificationService,
-                customQuoteLibrary: customQuoteLibrary
+                customQuoteLibrary: customQuoteLibrary,
+                tagLibrary: tagLibrary
             )
         )
         settingsWindow = window

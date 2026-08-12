@@ -62,6 +62,30 @@ final class SwiftDataQuoteRepository: QuoteRepository {
         }
     }
 
+    func toggleTag(_ tagID: UUID, onQuote quoteID: UUID) throws {
+        guard let record = try fetchAllRecords().first(where: { $0.id == quoteID }) else {
+            throw QuoteRepositoryError.notFound
+        }
+        guard let tag = try fetchAllTags().first(where: { $0.id == tagID }) else {
+            throw QuoteRepositoryError.notFound
+        }
+
+        if let index = record.tags.firstIndex(where: { $0.id == tagID }) {
+            record.tags.remove(at: index)
+        } else {
+            record.tags.append(tag)
+        }
+
+        do {
+            try context.save()
+        } catch {
+            AppLog.persistence.error(
+                "[Persistence] Tag toggle failed: \(error.localizedDescription, privacy: .public)"
+            )
+            throw QuoteRepositoryError.saveFailed(underlying: error)
+        }
+    }
+
     func deleteAll() throws {
         let records = try fetchAllRecords()
 
@@ -119,6 +143,20 @@ final class SwiftDataQuoteRepository: QuoteRepository {
         } catch {
             AppLog.persistence.error(
                 "[Persistence] Fetch failed: \(error.localizedDescription, privacy: .public)"
+            )
+            throw QuoteRepositoryError.fetchFailed(underlying: error)
+        }
+    }
+
+    /// Fetches `QuoteTag`s through this repository's own context — a tag
+    /// object from another repository's `ModelContext` isn't usable here,
+    /// SwiftData model instances don't cross contexts.
+    private func fetchAllTags() throws -> [QuoteTag] {
+        do {
+            return try context.fetch(FetchDescriptor<QuoteTag>())
+        } catch {
+            AppLog.persistence.error(
+                "[Persistence] Tag fetch failed: \(error.localizedDescription, privacy: .public)"
             )
             throw QuoteRepositoryError.fetchFailed(underlying: error)
         }

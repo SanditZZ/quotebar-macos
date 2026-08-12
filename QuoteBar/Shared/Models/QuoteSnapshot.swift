@@ -16,6 +16,7 @@ struct QuoteSnapshot: Equatable, Hashable, Sendable, Codable, Identifiable {
     let source: QuoteSource
     let seenAt: Date
     let isFavorite: Bool
+    let tags: [TagSnapshot]
 
     init(
         id: UUID,
@@ -23,7 +24,8 @@ struct QuoteSnapshot: Equatable, Hashable, Sendable, Codable, Identifiable {
         author: String?,
         source: QuoteSource,
         seenAt: Date,
-        isFavorite: Bool
+        isFavorite: Bool,
+        tags: [TagSnapshot]
     ) {
         self.id = id
         self.text = text
@@ -31,6 +33,7 @@ struct QuoteSnapshot: Equatable, Hashable, Sendable, Codable, Identifiable {
         self.source = source
         self.seenAt = seenAt
         self.isFavorite = isFavorite
+        self.tags = tags
     }
 }
 
