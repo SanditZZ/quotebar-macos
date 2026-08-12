@@ -23,6 +23,8 @@ final class AppSettings {
     private enum Key {
         static let confirmBeforeClearHistory = "confirmBeforeClearHistory"
         static let preferredSource = "preferredSource"
+        static let hotKeyCombination = "hotKeyCombination"
+        static let hotKeyEnabled = "hotKeyEnabled"
     }
 
     // MARK: - Data
@@ -40,6 +42,20 @@ final class AppSettings {
         didSet { defaults.set(preferredSource?.rawValue, forKey: Key.preferredSource) }
     }
 
+    /// The global "New Quote" shortcut. `nil` means the user explicitly
+    /// cleared it — distinct from a fresh install, which starts at
+    /// `HotKeyCombination.default` so the feature works before Settings is
+    /// ever opened. `Key.hotKeyEnabled` is what tells the two apart, since
+    /// UserDefaults has no way to distinguish "never set" from "set to nil".
+    var hotKeyCombination: HotKeyCombination? {
+        didSet {
+            defaults.set(hotKeyCombination != nil, forKey: Key.hotKeyEnabled)
+            if let hotKeyCombination, let encoded = try? JSONEncoder().encode(hotKeyCombination) {
+                defaults.set(encoded, forKey: Key.hotKeyCombination)
+            }
+        }
+    }
+
     // MARK: - Lifecycle
 
     init(defaults: UserDefaults = .standard) {
@@ -48,6 +64,11 @@ final class AppSettings {
             defaults.object(forKey: Key.confirmBeforeClearHistory) as? Bool ?? true
         self.preferredSource =
             (defaults.string(forKey: Key.preferredSource)).flatMap(QuoteSource.init(rawValue:))
+
+        let hotKeyEnabled = defaults.object(forKey: Key.hotKeyEnabled) as? Bool ?? true
+        let storedCombination = defaults.data(forKey: Key.hotKeyCombination)
+            .flatMap { try? JSONDecoder().decode(HotKeyCombination.self, from: $0) }
+        self.hotKeyCombination = hotKeyEnabled ? (storedCombination ?? .default) : nil
     }
 
     // MARK: - Actions
@@ -55,6 +76,7 @@ final class AppSettings {
     func resetToDefaults() {
         confirmBeforeClearHistory = true
         preferredSource = nil
+        hotKeyCombination = .default
         AppLog.settings.info("[Settings] Restored defaults")
     }
 }

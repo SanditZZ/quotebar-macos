@@ -6,10 +6,6 @@ A backlog of ideas that are not trivial enough to just build. Each entry notes t
 
 Idle Tapper (this project's sibling) ships automatic updates via Sparkle, signed with an EdDSA key kept out of the repo. QuoteBar does not have this yet. Non-trivial part: needs a generated appcast, a private key in a GitHub Actions secret, and — because the app is sandboxed here (unlike Idle Tapper) — Sparkle's XPC installer service rather than the simpler unsandboxed install path.
 
-## Preferred-source setting
-
-Let the user pin a specific provider (always AI, always a specific API, always offline) instead of the automatic fallback chain. Non-trivial part: the Settings UI needs to explain *why* a pinned choice might silently fail (e.g. "always AI" on a Mac without Apple Intelligence) rather than just stop producing quotes.
-
 ## Custom/imported quotes
 
 Let users add their own quotes to the rotation, or import a JSON/CSV file. Non-trivial part: needs de-duplication against the bundled set and a schema migration path in `QuoteRecord` for a `isUserAdded` flag.

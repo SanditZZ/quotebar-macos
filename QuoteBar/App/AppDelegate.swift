@@ -25,9 +25,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menuBarController = MenuBarController(
             tracker: environment.tracker,
             settings: environment.settings,
-            launchAtLogin: environment.launchAtLogin
+            launchAtLogin: environment.launchAtLogin,
+            hotKeyService: environment.hotKeyService
         )
         menuBarController?.install()
+
+        environment.hotKeyService.start { [weak menuBarController] in
+            menuBarController?.triggerFromGlobalHotKey()
+        }
+        environment.hotKeyService.updateCombination(environment.settings.hotKeyCombination)
 
         // Show a first quote immediately so the popover is never empty on
         // first open.

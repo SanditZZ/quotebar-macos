@@ -20,6 +20,7 @@ final class AppEnvironment {
     let settings: AppSettings
     let tracker: QuoteTracker
     let launchAtLogin: LaunchAtLoginService
+    let hotKeyService = GlobalHotKeyService()
 
     /// True when the on-disk store could not be opened and history is being
     /// held in memory only. Surfaced in the UI rather than failing silently.
