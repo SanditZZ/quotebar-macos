@@ -28,7 +28,7 @@ You can expect an acknowledgement within a few days and an assessment shortly af
 
 QuoteBar is a local menu bar app with no accounts and no telemetry. It has no third-party dependencies, and it makes network requests to fetch a quote when the on-device model is unavailable (see below).
 
-The app **is sandboxed** (`com.apple.security.app-sandbox`), with two additional entitlements: `com.apple.security.network.client`, used only to reach the two public quote APIs described below, and `com.apple.security.files.user-selected.read-only`, used only to read a JSON/CSV file you explicitly pick via Settings' "Your Quotes" import — the app cannot read any other file on disk.
+The app **is sandboxed** (`com.apple.security.app-sandbox`), with two additional entitlements: `com.apple.security.network.client`, used only to reach the two public quote APIs described below, and `com.apple.security.files.user-selected.read-write`, used only to read a JSON/CSV file you explicitly pick via Settings' "Your Quotes" import, and to write a JSON/CSV backup file you explicitly choose to export via Settings' "Backup" — the app cannot read or write any other file on disk.
 
 Areas that are in scope:
 

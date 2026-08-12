@@ -49,7 +49,8 @@ final class MenuBarController {
         hotKeyService: GlobalHotKeyService,
         notificationService: QuoteNotificationService,
         customQuoteLibrary: CustomQuoteLibrary,
-        tagLibrary: QuoteTagLibrary
+        tagLibrary: QuoteTagLibrary,
+        backupService: QuoteBackupService
     ) {
         self.tracker = tracker
         self.settings = settings
@@ -60,7 +61,8 @@ final class MenuBarController {
             hotKeyService: hotKeyService,
             notificationService: notificationService,
             customQuoteLibrary: customQuoteLibrary,
-            tagLibrary: tagLibrary
+            tagLibrary: tagLibrary,
+            backupService: backupService
         )
     }
 

@@ -23,7 +23,8 @@ struct QuoteBarApp: App {
                 hotKeyService: AppEnvironment.shared.hotKeyService,
                 notificationService: AppEnvironment.shared.notificationService,
                 customQuoteLibrary: AppEnvironment.shared.customQuoteLibrary,
-                tagLibrary: AppEnvironment.shared.tagLibrary
+                tagLibrary: AppEnvironment.shared.tagLibrary,
+                backupService: AppEnvironment.shared.backupService
             )
         }
     }

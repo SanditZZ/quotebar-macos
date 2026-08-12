@@ -54,6 +54,16 @@ protocol QuoteRepository: AnyObject {
     /// unreachable from normal UI, so not worth distinguishing further.
     func toggleTag(_ tagID: UUID, onQuote quoteID: UUID) throws
 
+    /// Insert every snapshot whose `id` isn't already present, resolving
+    /// each tag by name (case-insensitively) against existing tags —
+    /// creating one if no match exists — rather than trusting
+    /// `TagSnapshot.id`, since an imported backup's ids won't necessarily
+    /// match this store's. Returns the count actually inserted; snapshots
+    /// whose id already exists are skipped, not overwritten, so
+    /// re-importing the same backup twice is a no-op.
+    @discardableResult
+    func importHistory(_ snapshots: [QuoteSnapshot]) throws -> Int
+
     /// Delete all history. Irreversible.
     func deleteAll() throws
 
