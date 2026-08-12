@@ -21,3 +21,15 @@ A macOS widget showing today's quote. Non-trivial part: widgets run in a separat
 ## Live duplicate feedback in the "Add Quote" form
 
 `CustomQuotesEditor`'s manual add form only reports a duplicate after the user clicks "Add" and the repository throws — the check happens server-side (in `SwiftDataCustomQuoteRepository.add`), not as the user types. Non-trivial part: `CustomQuoteDeduplicator` is already a pure function, so the calculation itself is cheap to call on every keystroke; the real work is deciding how much of `CustomQuoteLibrary.entries` (already loaded) versus the bundled set (currently only read inside the repository, via `BundledQuoteProvider.allTexts`) needs to be threaded into the view layer without violating "views are presentational."
+
+## Automatic scheduled backups
+
+Now that a versioned `QuoteBackup` JSON format and `QuoteBackupService.makeJSONExportData()` exist (manual export/import only, shipped alongside bulk-delete), the natural next step is backing up on a schedule instead of only on demand. Non-trivial part: a sandboxed app can't silently write to an arbitrary location — `.fileExporter` always prompts — so a truly automatic backup needs either a one-time user-granted security-scoped bookmark to a folder (persisted across launches, with its own re-authorization-if-revoked handling) or accepting a periodic *reminder* to export manually rather than a fully silent write.
+
+## Drag-and-drop file import
+
+Both "Your Quotes" and the new "Backup" section only accept files via an explicit `.fileImporter` button; dropping a `.json`/`.csv` file onto the popover or the relevant Settings section would be faster. Non-trivial part: `.onDrop`/`DropDelegate` hands back a security-scoped `NSItemProvider` reference rather than a ready `URL`, and the existing `importFile`/`importBackup` methods assume they're handed a `URL` from `.fileImporter`'s completion handler — reusing them cleanly means resolving the provider to a URL first without breaking the "read it, don't retain sandbox access" pattern importers already use.
+
+## "Last backup" timestamp in Settings
+
+`QuoteBackupService` currently reports only a one-line summary immediately after an export/import ("Exported N quotes as JSON."), which disappears the next time Settings is reopened — there's no persistent way to tell whether (or how long ago) a backup was last made. Non-trivial part: needs a new `AppSettings` field for the last export date, but has to be careful about *when* it's considered "backed up" — an export the user cancelled partway through the save panel shouldn't count, so it can only be set from `.fileExporter`'s `.success` completion, not from `makeJSONExportData()` being called.
