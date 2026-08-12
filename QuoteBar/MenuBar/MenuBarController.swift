@@ -47,6 +47,7 @@ final class MenuBarController {
         settings: AppSettings,
         launchAtLogin: LaunchAtLoginService,
         hotKeyService: GlobalHotKeyService,
+        notificationService: QuoteNotificationService,
         customQuoteLibrary: CustomQuoteLibrary
     ) {
         self.tracker = tracker
@@ -56,6 +57,7 @@ final class MenuBarController {
             settings: settings,
             launchAtLogin: launchAtLogin,
             hotKeyService: hotKeyService,
+            notificationService: notificationService,
             customQuoteLibrary: customQuoteLibrary
         )
     }

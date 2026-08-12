@@ -32,4 +32,7 @@ enum AppLog {
 
     /// User settings and preferences.
     static let settings = Logger(subsystem: subsystem, category: "Settings")
+
+    /// The daily "Quote of the Day" notification: authorization, scheduling, taps.
+    static let notifications = Logger(subsystem: subsystem, category: "Notifications")
 }
