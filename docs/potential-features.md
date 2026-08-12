@@ -21,3 +21,15 @@ Let users request quotes filtered to a mood or topic ("motivational", "stoic", "
 ## Widget
 
 A macOS widget showing today's quote. Non-trivial part: widgets run in a separate process/extension with their own timeline provider — the provider chain (especially the on-device AI call, which is not guaranteed to be fast) needs a timeout-and-cache strategy so the widget never shows a blank state while waiting.
+
+## Quote source badge for user-added quotes
+
+Once custom/imported quotes exist, the popover's existing per-source badge needs a distinct label for them so they don't read as AI/network/bundled. Non-trivial part: the badge logic currently maps 1:1 to `QuoteSource` cases from the fixed provider chain; a user-added quote isn't produced by any provider in that chain, so the badge/source model needs a case that doesn't imply "this came from a fallback attempt."
+
+## Export/backup of quote history
+
+Let users export their full quote history (and, once it exists, their imported/custom quotes) to a file, and re-import it. Non-trivial part: needs a stable serialization format for `QuoteRecord`/`QuoteSnapshot` chosen up front so it survives schema changes — and doing this before iCloud sync de-risks that later work by proving the format out.
+
+## Bulk-delete for imported quotes
+
+Once users can add their own quotes, they'll want to prune them in bulk rather than one at a time. Non-trivial part: needs a selection UI in a currently single-item-focused history view, and a repository method that removes many `QuoteRecord`s in one transaction rather than N individual deletes.
