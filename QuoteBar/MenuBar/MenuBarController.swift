@@ -15,10 +15,17 @@ import SwiftUI
 final class MenuBarController {
 
     private let tracker: QuoteTracker
+    private let settings: AppSettings
     private let windowCoordinator: WindowCoordinator
 
     private var statusItem: NSStatusItem?
     private var popover: NSPopover?
+
+    /// Held for the duration of a share presentation. `NSSharingServicePicker`
+    /// isn't retained by anything else while its popover is on screen — a
+    /// purely local instance would be freed by ARC the moment
+    /// `shareCurrentQuote()` returns, before the user has picked anything.
+    private var sharingPicker: NSSharingServicePicker?
 
     /// Monitors clicks outside the popover so it dismisses like a menu.
     private lazy var outsideClickMonitor = EventMonitor(
@@ -43,6 +50,7 @@ final class MenuBarController {
         customQuoteLibrary: CustomQuoteLibrary
     ) {
         self.tracker = tracker
+        self.settings = settings
         self.windowCoordinator = WindowCoordinator(
             tracker: tracker,
             settings: settings,
@@ -146,6 +154,9 @@ final class MenuBarController {
         menu.addItem(.separator())
         menu.addItem(withTitle: "History…", action: #selector(openHistory), keyEquivalent: "")
             .target = self
+        menu.addItem(withTitle: "Share Quote…", action: #selector(shareCurrentQuoteFromMenu), keyEquivalent: "")
+            .target = self
+        menu.items.last?.isEnabled = tracker.currentQuote != nil
         menu.addItem(withTitle: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
             .target = self
         menu.addItem(.separator())
@@ -165,6 +176,30 @@ final class MenuBarController {
 
     @objc private func openHistory() {
         windowCoordinator.showHistory()
+    }
+
+    @objc private func shareCurrentQuoteFromMenu() {
+        shareCurrentQuote()
+    }
+
+    /// Renders the current quote and presents the system share picker,
+    /// anchored to the status item so it works whether triggered from the
+    /// popover's footer or the right-click menu. No-ops rather than showing
+    /// an error if there's no current quote or rendering fails — both are
+    /// edge cases already guarded against at the call sites (the footer
+    /// button is disabled, the menu item is un-enabled) when there's no
+    /// quote to share.
+    private func shareCurrentQuote() {
+        guard
+            let quote = tracker.currentQuote,
+            let image = QuoteImageRenderer.renderImage(for: quote, style: settings.shareCardStyle),
+            let button = statusItem?.button
+        else { return }
+
+        let picker = NSSharingServicePicker(items: [image])
+        sharingPicker = picker
+        picker.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+        AppLog.menuBar.debug("[MenuBar] Presented share picker")
     }
 
     @objc private func openSettings() {
@@ -192,6 +227,9 @@ final class MenuBarController {
             onOpenSettings: { [weak self] in
                 self?.closePopover()
                 self?.windowCoordinator.showSettings()
+            },
+            onShare: { [weak self] in
+                self?.shareCurrentQuote()
             },
             onQuit: { [weak self] in
                 self?.quit()

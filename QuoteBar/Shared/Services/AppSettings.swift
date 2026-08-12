@@ -25,6 +25,7 @@ final class AppSettings {
         static let preferredSource = "preferredSource"
         static let hotKeyCombination = "hotKeyCombination"
         static let hotKeyEnabled = "hotKeyEnabled"
+        static let shareCardStyle = "shareCardStyle"
     }
 
     // MARK: - Data
@@ -40,6 +41,12 @@ final class AppSettings {
     /// fallback order. `nil` means automatic — the default.
     var preferredSource: QuoteSource? {
         didSet { defaults.set(preferredSource?.rawValue, forKey: Key.preferredSource) }
+    }
+
+    /// Which look the exported share-quote image uses. Always has a value —
+    /// unlike `preferredSource`, there's no "automatic" option here.
+    var shareCardStyle: ShareCardStyle {
+        didSet { defaults.set(shareCardStyle.rawValue, forKey: Key.shareCardStyle) }
     }
 
     /// The global "New Quote" shortcut. `nil` means the user explicitly
@@ -64,6 +71,8 @@ final class AppSettings {
             defaults.object(forKey: Key.confirmBeforeClearHistory) as? Bool ?? true
         self.preferredSource =
             (defaults.string(forKey: Key.preferredSource)).flatMap(QuoteSource.init(rawValue:))
+        self.shareCardStyle =
+            (defaults.string(forKey: Key.shareCardStyle)).flatMap(ShareCardStyle.init(rawValue:)) ?? .midnight
 
         let hotKeyEnabled = defaults.object(forKey: Key.hotKeyEnabled) as? Bool ?? true
         let storedCombination = defaults.data(forKey: Key.hotKeyCombination)
@@ -77,6 +86,7 @@ final class AppSettings {
         confirmBeforeClearHistory = true
         preferredSource = nil
         hotKeyCombination = .default
+        shareCardStyle = .midnight
         AppLog.settings.info("[Settings] Restored defaults")
     }
 }

@@ -50,6 +50,16 @@ enum DesignTokens {
 
         /// Uppercase label above a statistic (10px, semibold).
         static let statLabel = Font.system(size: 10, weight: .semibold)
+
+        /// The quote text on an exported share image — large, since the
+        /// canvas is a fixed 1080×1080 rather than the narrow popover.
+        static let shareQuote = Font.system(size: 44, weight: .medium, design: .serif)
+
+        /// The author line on an exported share image.
+        static let shareAuthor = Font.system(size: 22, weight: .semibold)
+
+        /// The "QuoteBar" watermark on an exported share image.
+        static let shareWatermark = Font.system(size: 15, weight: .semibold)
     }
 
     // MARK: - Spacing
@@ -78,6 +88,10 @@ enum DesignTokens {
 
         /// Outer padding of the popover (16px).
         static let popoverPadding: CGFloat = 16
+
+        /// Outer padding of an exported share image — roughly 9.5% of the
+        /// canvas, matched to the design mockup reviewed before building this.
+        static let sharePadding: CGFloat = 104
     }
 
     // MARK: - Corner Radius
@@ -133,6 +147,11 @@ enum DesignTokens {
 
         /// Smallest Settings window. The content scrolls below this.
         static let settingsWindowMinSize = CGSize(width: 440, height: 360)
+
+        /// Fixed square canvas for an exported share image — works for every
+        /// share destination (Messages, AirDrop, Save Image, posted anywhere)
+        /// without letterboxing.
+        static let shareImageSize = CGSize(width: 1080, height: 1080)
     }
 
     // MARK: - Animation
