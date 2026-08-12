@@ -65,7 +65,8 @@ struct QuoteCardView: View {
             author: "Socrates",
             source: .bundled,
             seenAt: Date(),
-            isFavorite: true
+            isFavorite: true,
+            tags: []
         ),
         isFetching: false,
         onToggleFavorite: {}

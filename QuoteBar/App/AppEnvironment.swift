@@ -23,6 +23,7 @@ final class AppEnvironment {
     let hotKeyService = GlobalHotKeyService()
     let notificationService = QuoteNotificationService()
     let customQuoteLibrary: CustomQuoteLibrary
+    let tagLibrary: QuoteTagLibrary
 
     /// True when the on-disk store could not be opened and history is being
     /// held in memory only. Surfaced in the UI rather than failing silently.
@@ -56,6 +57,9 @@ final class AppEnvironment {
 
         let customQuoteRepository = SwiftDataCustomQuoteRepository(container: container)
         self.customQuoteLibrary = CustomQuoteLibrary(repository: customQuoteRepository)
+
+        let quoteTagRepository = SwiftDataQuoteTagRepository(container: container)
+        self.tagLibrary = QuoteTagLibrary(repository: quoteTagRepository)
 
         self.tracker = QuoteTracker(
             repository: SwiftDataQuoteRepository(container: container),

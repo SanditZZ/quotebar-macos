@@ -10,20 +10,27 @@ import SwiftUI
 struct HistoryView: View {
     var tracker: QuoteTracker
     var settings: AppSettings
+    var tagLibrary: QuoteTagLibrary
 
     @State private var favoritesOnly = false
+    @State private var selectedTagIDs: Set<UUID> = []
 
     private var visibleQuotes: [QuoteSnapshot] {
-        favoritesOnly ? tracker.history.filter(\.isFavorite) : tracker.history
+        let base = favoritesOnly ? tracker.history.filter(\.isFavorite) : tracker.history
+        return QuoteTagFilter.matching(base, selectedTagIDs: selectedTagIDs)
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.medium) {
             statsRow
 
-            Toggle("Favorites only", isOn: $favoritesOnly)
-                .toggleStyle(.checkbox)
-                .font(DesignTokens.Typography.bodyMedium)
+            HStack {
+                Toggle("Favorites only", isOn: $favoritesOnly)
+                    .toggleStyle(.checkbox)
+
+                tagFilterMenu
+            }
+            .font(DesignTokens.Typography.bodyMedium)
 
             if visibleQuotes.isEmpty {
                 emptyState
@@ -60,16 +67,51 @@ struct HistoryView: View {
         .appCard(padding: DesignTokens.Spacing.small)
     }
 
+    private var tagFilterMenu: some View {
+        Menu(tagFilterLabel) {
+            if tagLibrary.tags.isEmpty {
+                Text("No tags yet")
+            } else {
+                ForEach(tagLibrary.tags) { tag in
+                    Toggle(tag.name, isOn: Binding(
+                        get: { selectedTagIDs.contains(tag.id) },
+                        set: { isOn in
+                            if isOn {
+                                selectedTagIDs.insert(tag.id)
+                            } else {
+                                selectedTagIDs.remove(tag.id)
+                            }
+                        }
+                    ))
+                }
+                if !selectedTagIDs.isEmpty {
+                    Divider()
+                    Button("Clear Tag Filter") { selectedTagIDs.removeAll() }
+                }
+            }
+        }
+    }
+
+    private var tagFilterLabel: String {
+        selectedTagIDs.isEmpty ? "Tags" : "Tags (\(selectedTagIDs.count))"
+    }
+
     private var emptyState: some View {
         VStack(spacing: DesignTokens.Spacing.small) {
             Image(systemName: "quote.bubble")
                 .font(.system(size: 28))
                 .foregroundStyle(AppColors.textTertiary)
-            Text(favoritesOnly ? "No favorites yet" : "No quotes yet")
+            Text(emptyStateText)
                 .font(DesignTokens.Typography.bodyMedium)
                 .foregroundStyle(AppColors.textSecondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var emptyStateText: String {
+        if favoritesOnly { return "No favorites yet" }
+        if !selectedTagIDs.isEmpty { return "No quotes with that tag" }
+        return "No quotes yet"
     }
 
     private func row(for quote: QuoteSnapshot) -> some View {
@@ -81,9 +123,18 @@ struct HistoryView: View {
                 Text(QuoteTextFormatter.attribution(author: quote.author))
                     .font(DesignTokens.Typography.caption)
                     .foregroundStyle(AppColors.textSecondary)
-                SourceBadge(source: quote.source)
+                HStack(spacing: DesignTokens.Spacing.extraSmall) {
+                    SourceBadge(source: quote.source)
+                    if !quote.tags.isEmpty {
+                        ForEach(quote.tags) { tag in
+                            TagPill(name: tag.name)
+                        }
+                    }
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+
+            QuoteTagPicker(quote: quote, tracker: tracker, tagLibrary: tagLibrary)
 
             Button {
                 tracker.toggleFavorite(id: quote.id)
@@ -98,14 +149,16 @@ struct HistoryView: View {
 }
 
 #Preview {
+    let container = try! ModelContainerFactory.makeInMemory()
     HistoryView(
         tracker: QuoteTracker(
-            repository: SwiftDataQuoteRepository(container: try! ModelContainerFactory.makeInMemory()),
+            repository: SwiftDataQuoteRepository(container: container),
             provider: QuoteProviderService(),
             settings: AppSettings(defaults: UserDefaults(suiteName: "preview")!),
             isEphemeral: false
         ),
-        settings: AppSettings(defaults: UserDefaults(suiteName: "preview")!)
+        settings: AppSettings(defaults: UserDefaults(suiteName: "preview")!),
+        tagLibrary: QuoteTagLibrary(repository: SwiftDataQuoteTagRepository(container: container))
     )
     .frame(width: 480, height: 480)
 }

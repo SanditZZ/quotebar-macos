@@ -19,6 +19,13 @@ struct QuoteRepositoryTests {
         return SwiftDataQuoteRepository(container: container)
     }
 
+    /// A quote repository and a tag repository sharing the same store, for
+    /// tests that exercise the `QuoteRecord` ↔ `QuoteTag` relationship.
+    private func makeRepositoryPair() throws -> (SwiftDataQuoteRepository, SwiftDataQuoteTagRepository) {
+        let container = try ModelContainerFactory.makeInMemory()
+        return (SwiftDataQuoteRepository(container: container), SwiftDataQuoteTagRepository(container: container))
+    }
+
     @Test("A fresh repository has no history")
     func freshRepositoryIsEmpty() throws {
         let repository = try makeRepository()
@@ -101,6 +108,79 @@ struct QuoteRepositoryTests {
         #expect(throws: QuoteRepositoryError.self) {
             try repository.toggleFavorite(id: UUID())
         }
+    }
+
+    @Test("toggleTag adds the tag, and toggling again removes it")
+    func toggleTagAddsThenRemoves() throws {
+        let (quoteRepository, tagRepository) = try makeRepositoryPair()
+        let quote = try quoteRepository.record(TestSupport.quote(text: "Tag me"))
+        let tag = try tagRepository.add(name: "Stoic")
+
+        try quoteRepository.toggleTag(tag.id, onQuote: quote.id)
+        #expect(try quoteRepository.allQuotes().first?.tags.map(\.name) == ["Stoic"])
+
+        try quoteRepository.toggleTag(tag.id, onQuote: quote.id)
+        #expect(try quoteRepository.allQuotes().first?.tags.isEmpty == true)
+    }
+
+    @Test("toggleTag with an unknown quote id throws")
+    func toggleTagUnknownQuoteThrows() throws {
+        let (quoteRepository, tagRepository) = try makeRepositoryPair()
+        let tag = try tagRepository.add(name: "Stoic")
+
+        #expect(throws: QuoteRepositoryError.self) {
+            try quoteRepository.toggleTag(tag.id, onQuote: UUID())
+        }
+    }
+
+    @Test("toggleTag with an unknown tag id throws")
+    func toggleTagUnknownTagThrows() throws {
+        let (quoteRepository, _) = try makeRepositoryPair()
+        let quote = try quoteRepository.record(TestSupport.quote(text: "Tag me"))
+
+        #expect(throws: QuoteRepositoryError.self) {
+            try quoteRepository.toggleTag(UUID(), onQuote: quote.id)
+        }
+    }
+
+    @Test("A tag applied to two different quotes shows up on both")
+    func tagAppliesToMultipleQuotes() throws {
+        let (quoteRepository, tagRepository) = try makeRepositoryPair()
+        let first = try quoteRepository.record(TestSupport.quote(text: "First"))
+        let second = try quoteRepository.record(TestSupport.quote(text: "Second"))
+        let tag = try tagRepository.add(name: "Stoic")
+
+        try quoteRepository.toggleTag(tag.id, onQuote: first.id)
+        try quoteRepository.toggleTag(tag.id, onQuote: second.id)
+
+        let all = try quoteRepository.allQuotes()
+        #expect(all.allSatisfy { $0.tags.map(\.name) == ["Stoic"] })
+    }
+
+    @Test("Deleting a tag removes it from a quote without deleting the quote")
+    func deletingTagDetachesWithoutDeletingQuote() throws {
+        let (quoteRepository, tagRepository) = try makeRepositoryPair()
+        let quote = try quoteRepository.record(TestSupport.quote(text: "Tag me"))
+        let tag = try tagRepository.add(name: "Stoic")
+        try quoteRepository.toggleTag(tag.id, onQuote: quote.id)
+
+        try tagRepository.remove(id: tag.id)
+
+        let all = try quoteRepository.allQuotes()
+        #expect(all.count == 1)
+        #expect(all.first?.tags.isEmpty == true)
+    }
+
+    @Test("Renaming a tag is reflected on an already-tagged quote")
+    func renamingTagReflectsOnTaggedQuote() throws {
+        let (quoteRepository, tagRepository) = try makeRepositoryPair()
+        let quote = try quoteRepository.record(TestSupport.quote(text: "Tag me"))
+        let tag = try tagRepository.add(name: "Stoic")
+        try quoteRepository.toggleTag(tag.id, onQuote: quote.id)
+
+        try tagRepository.rename(id: tag.id, to: "Stoicism")
+
+        #expect(try quoteRepository.allQuotes().first?.tags.map(\.name) == ["Stoicism"])
     }
 
     @Test("deleteAll removes every sighting")

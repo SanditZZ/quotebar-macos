@@ -103,7 +103,8 @@ final class QuoteTracker {
                 author: quote.author,
                 source: quote.source,
                 seenAt: Date(),
-                isFavorite: false
+                isFavorite: false,
+                tags: []
             )
         }
     }
@@ -128,6 +129,16 @@ final class QuoteTracker {
         } catch {
             AppLog.quote.error("[Quote] Failed to toggle favorite: \(error.localizedDescription, privacy: .public)")
             errorMessage = "Couldn't update that favorite."
+        }
+    }
+
+    func toggleTag(_ tagID: UUID, onQuote quoteID: UUID) {
+        do {
+            try repository.toggleTag(tagID, onQuote: quoteID)
+            refresh()
+        } catch {
+            AppLog.quote.error("[Quote] Failed to toggle tag: \(error.localizedDescription, privacy: .public)")
+            errorMessage = "Couldn't update that tag."
         }
     }
 

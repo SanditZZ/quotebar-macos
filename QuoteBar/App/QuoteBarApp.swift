@@ -22,7 +22,8 @@ struct QuoteBarApp: App {
                 launchAtLogin: AppEnvironment.shared.launchAtLogin,
                 hotKeyService: AppEnvironment.shared.hotKeyService,
                 notificationService: AppEnvironment.shared.notificationService,
-                customQuoteLibrary: AppEnvironment.shared.customQuoteLibrary
+                customQuoteLibrary: AppEnvironment.shared.customQuoteLibrary,
+                tagLibrary: AppEnvironment.shared.tagLibrary
             )
         }
     }

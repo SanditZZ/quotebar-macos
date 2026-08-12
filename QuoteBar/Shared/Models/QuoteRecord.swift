@@ -31,6 +31,13 @@ final class QuoteRecord {
     /// Whether the user marked this sighting as a favorite.
     var isFavorite: Bool
 
+    /// User-assigned tags. `.nullify`: deleting a tag detaches it from here
+    /// without deleting this sighting; see `QuoteTag.quotes` for the other
+    /// side of this relationship (this app's first `@Relationship` — see
+    /// that file's build-verification note).
+    @Relationship(deleteRule: .nullify)
+    var tags: [QuoteTag] = []
+
     init(
         id: UUID = UUID(),
         text: String,
@@ -61,7 +68,10 @@ extension QuoteRecord {
             author: author,
             source: QuoteSource(rawValue: sourceRaw) ?? .bundled,
             seenAt: seenAt,
-            isFavorite: isFavorite
+            isFavorite: isFavorite,
+            tags: tags.map(\.snapshot).sorted {
+                $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
+            }
         )
     }
 }

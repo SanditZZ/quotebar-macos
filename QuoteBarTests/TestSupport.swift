@@ -35,7 +35,8 @@ enum TestSupport {
         author: String? = "Test Author",
         source: QuoteSource = .bundled,
         seenAt: Date = referenceDate,
-        isFavorite: Bool = false
+        isFavorite: Bool = false,
+        tags: [TagSnapshot] = []
     ) -> QuoteSnapshot {
         QuoteSnapshot(
             id: UUID(),
@@ -43,7 +44,8 @@ enum TestSupport {
             author: author,
             source: source,
             seenAt: seenAt,
-            isFavorite: isFavorite
+            isFavorite: isFavorite,
+            tags: tags
         )
     }
 
@@ -53,5 +55,9 @@ enum TestSupport {
         addedAt: Date = referenceDate
     ) -> CustomQuoteSnapshot {
         CustomQuoteSnapshot(id: UUID(), text: text, author: author, addedAt: addedAt)
+    }
+
+    static func tag(name: String, createdAt: Date = referenceDate) -> TagSnapshot {
+        TagSnapshot(id: UUID(), name: name, createdAt: createdAt)
     }
 }
