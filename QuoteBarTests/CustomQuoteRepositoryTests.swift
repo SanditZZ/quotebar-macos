@@ -81,6 +81,41 @@ struct CustomQuoteRepositoryTests {
         }
     }
 
+    @Test("removeMany deletes all specified ids in one call, leaving others untouched")
+    func removeManyDeletesSpecifiedIds() throws {
+        let repository = try makeRepository()
+        let a = try repository.add(text: "A", author: nil)
+        let b = try repository.add(text: "B", author: nil)
+        let c = try repository.add(text: "C", author: nil)
+
+        let removedCount = try repository.removeMany(ids: [a.id, c.id])
+
+        #expect(removedCount == 2)
+        #expect(try repository.allEntries().map(\.text) == [b.text])
+    }
+
+    @Test("removeMany ignores an unknown id mixed in with a valid one")
+    func removeManyIgnoresUnknownIds() throws {
+        let repository = try makeRepository()
+        let a = try repository.add(text: "A", author: nil)
+
+        let removedCount = try repository.removeMany(ids: [a.id, UUID()])
+
+        #expect(removedCount == 1)
+        #expect(try repository.allEntries().isEmpty)
+    }
+
+    @Test("removeMany with an empty set removes nothing")
+    func removeManyWithEmptySetRemovesNothing() throws {
+        let repository = try makeRepository()
+        try repository.add(text: "A", author: nil)
+
+        let removedCount = try repository.removeMany(ids: [])
+
+        #expect(removedCount == 0)
+        #expect(try repository.allEntries().count == 1)
+    }
+
     @Test("importMany adds every non-duplicate row and counts duplicates skipped")
     func importManyAddsNonDuplicates() throws {
         let repository = try makeRepository()

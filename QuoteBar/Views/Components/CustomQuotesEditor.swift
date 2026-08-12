@@ -16,6 +16,9 @@ struct CustomQuotesEditor: View {
     @State private var newText = ""
     @State private var newAuthor = ""
     @State private var showingImporter = false
+    @State private var isSelecting = false
+    @State private var selectedIDs: Set<UUID> = []
+    @State private var showingDeleteConfirmation = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
@@ -27,6 +30,8 @@ struct CustomQuotesEditor: View {
                 Text("\(library.entries.count) quote\(library.entries.count == 1 ? "" : "s")")
                     .font(DesignTokens.Typography.caption)
                     .foregroundStyle(AppColors.textTertiary)
+                Button(isSelecting ? "Done" : "Select") { toggleSelectionMode() }
+                    .disabled(library.entries.isEmpty && !isSelecting)
             }
 
             if let summary = library.lastImportSummary {
@@ -44,6 +49,10 @@ struct CustomQuotesEditor: View {
             if !library.entries.isEmpty {
                 entryList
             }
+
+            if isSelecting {
+                selectionActionBar
+            }
         }
         .fileImporter(
             isPresented: $showingImporter,
@@ -52,6 +61,46 @@ struct CustomQuotesEditor: View {
             if case .success(let url) = result {
                 library.importFile(at: url)
             }
+        }
+    }
+
+    private func toggleSelectionMode() {
+        isSelecting.toggle()
+        if !isSelecting {
+            selectedIDs.removeAll()
+        }
+    }
+
+    private func toggleSelection(_ id: UUID) {
+        if selectedIDs.contains(id) {
+            selectedIDs.remove(id)
+        } else {
+            selectedIDs.insert(id)
+        }
+    }
+
+    private var selectionActionBar: some View {
+        HStack {
+            Text("\(selectedIDs.count) selected")
+                .font(DesignTokens.Typography.caption)
+                .foregroundStyle(AppColors.textSecondary)
+            Spacer()
+            Button("Delete", role: .destructive) { showingDeleteConfirmation = true }
+                .disabled(selectedIDs.isEmpty)
+        }
+        .confirmationDialog(
+            "Delete \(selectedIDs.count) quote\(selectedIDs.count == 1 ? "" : "s")?",
+            isPresented: $showingDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                library.removeMany(ids: selectedIDs)
+                selectedIDs.removeAll()
+                isSelecting = false
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This cannot be undone.")
         }
     }
 
@@ -83,6 +132,17 @@ struct CustomQuotesEditor: View {
 
     private func row(for entry: CustomQuoteSnapshot) -> some View {
         HStack(alignment: .top, spacing: DesignTokens.Spacing.small) {
+            if isSelecting {
+                Button {
+                    toggleSelection(entry.id)
+                } label: {
+                    Image(systemName: selectedIDs.contains(entry.id) ? "checkmark.circle.fill" : "circle")
+                        .foregroundStyle(selectedIDs.contains(entry.id) ? AppColors.accent : AppColors.textTertiary)
+                        .frame(width: DesignTokens.Spacing.iconFrame)
+                }
+                .buttonStyle(.plain)
+            }
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(entry.text)
                     .font(DesignTokens.Typography.body)
@@ -93,15 +153,23 @@ struct CustomQuotesEditor: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            Button {
-                library.remove(id: entry.id)
-            } label: {
-                Image(systemName: "trash")
-                    .foregroundStyle(AppColors.textTertiary)
+            if !isSelecting {
+                Button {
+                    library.remove(id: entry.id)
+                } label: {
+                    Image(systemName: "trash")
+                        .foregroundStyle(AppColors.textTertiary)
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
         .padding(.vertical, DesignTokens.Spacing.extraSmall)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            if isSelecting {
+                toggleSelection(entry.id)
+            }
+        }
     }
 }
 

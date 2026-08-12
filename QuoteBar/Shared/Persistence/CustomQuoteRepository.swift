@@ -58,4 +58,11 @@ protocol CustomQuoteRepository: AnyObject {
     /// came from it — history is a log of what was shown, not a live view
     /// of the library.
     func remove(id: UUID) throws
+
+    /// Remove every entry whose id is in `ids`, in one save. Unknown ids are
+    /// silently ignored, mirroring `QuoteRepository.deleteAll()`'s "don't
+    /// fail the whole batch" stance — the UI only ever passes ids it just
+    /// read from `allEntries()`.
+    @discardableResult
+    func removeMany(ids: Set<UUID>) throws -> Int
 }
