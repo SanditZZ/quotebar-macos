@@ -60,6 +60,16 @@ final class CustomQuoteLibrary {
         }
     }
 
+    func removeMany(ids: Set<UUID>) {
+        do {
+            try repository.removeMany(ids: ids)
+            refresh()
+        } catch {
+            AppLog.persistence.error("[Persistence] Failed to remove custom quotes: \(error.localizedDescription, privacy: .public)")
+            errorMessage = "Couldn't remove those quotes."
+        }
+    }
+
     /// Read and parse a file the user picked via `.fileImporter`, then add
     /// every non-duplicate row.
     func importFile(at url: URL) {

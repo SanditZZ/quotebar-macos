@@ -26,6 +26,12 @@ private final class FakeCustomQuoteRepository: CustomQuoteRepository {
     func remove(id: UUID) throws {
         entries.removeAll { $0.id == id }
     }
+
+    func removeMany(ids: Set<UUID>) throws -> Int {
+        let before = entries.count
+        entries.removeAll { ids.contains($0.id) }
+        return before - entries.count
+    }
 }
 
 @Suite("Custom quote provider")

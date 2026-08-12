@@ -89,6 +89,26 @@ final class SwiftDataCustomQuoteRepository: CustomQuoteRepository {
         }
     }
 
+    @discardableResult
+    func removeMany(ids: Set<UUID>) throws -> Int {
+        guard !ids.isEmpty else { return 0 }
+        let matches = try fetchAllEntries().filter { ids.contains($0.id) }
+
+        do {
+            for entry in matches {
+                context.delete(entry)
+            }
+            try context.save()
+            AppLog.persistence.info("[Persistence] Removed \(matches.count, privacy: .public) custom quotes")
+            return matches.count
+        } catch {
+            AppLog.persistence.error(
+                "[Persistence] Bulk custom quote delete failed: \(error.localizedDescription, privacy: .public)"
+            )
+            throw CustomQuoteRepositoryError.saveFailed(underlying: error)
+        }
+    }
+
     // MARK: - Reads
 
     func allEntries() throws -> [CustomQuoteSnapshot] {
