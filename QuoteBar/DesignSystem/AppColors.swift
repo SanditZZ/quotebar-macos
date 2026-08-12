@@ -53,6 +53,9 @@ enum AppColors {
     /// Badge tint for a quote served from the bundled offline set.
     static let sourceBundled = Color.adaptiveTextSecondary
 
+    /// Badge tint for a quote from the user's own custom/imported library.
+    static let sourceCustom = Color.pink
+
     // MARK: - Status
 
     /// Success / positive state.

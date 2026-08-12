@@ -28,7 +28,7 @@ You can expect an acknowledgement within a few days and an assessment shortly af
 
 QuoteBar is a local menu bar app with no accounts and no telemetry. It has no third-party dependencies, and it makes network requests to fetch a quote when the on-device model is unavailable (see below).
 
-The app **is sandboxed** (`com.apple.security.app-sandbox`), with exactly one additional entitlement: `com.apple.security.network.client`, used only to reach the two public quote APIs described below.
+The app **is sandboxed** (`com.apple.security.app-sandbox`), with two additional entitlements: `com.apple.security.network.client`, used only to reach the two public quote APIs described below, and `com.apple.security.files.user-selected.read-only`, used only to read a JSON/CSV file you explicitly pick via Settings' "Your Quotes" import — the app cannot read any other file on disk.
 
 Areas that are in scope:
 
@@ -47,7 +47,7 @@ Out of scope:
 
 For clarity, since it affects what a vulnerability could expose:
 
-- Quote history (text, author, source, favorite flag, timestamp seen) is stored in a local SwiftData/SQLite database inside the app's sandbox container
+- Quote history (text, author, source, favorite flag, timestamp seen) and your custom/imported quote library are stored in a local SwiftData/SQLite database inside the app's sandbox container
 - Preferences are stored in `UserDefaults`
 - No identifier, usage information, or history is transmitted anywhere; there is no server, no analytics and no crash reporting
 - When the on-device model is unavailable, the app requests a quote from **[ZenQuotes](https://zenquotes.io)** or **[DummyJSON](https://dummyjson.com)** — both public, keyless, unauthenticated APIs. These requests carry no identifying information beyond what any HTTP request discloses (IP address, standard headers). Neither call is made if you have no network connection; the app falls back to its bundled offline quote set instead

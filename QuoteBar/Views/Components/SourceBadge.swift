@@ -17,6 +17,7 @@ struct SourceBadge: View {
         case .onDeviceAI: return AppColors.sourceAI
         case .zenQuotes, .dummyJSON: return AppColors.sourceNetwork
         case .bundled: return AppColors.sourceBundled
+        case .custom: return AppColors.sourceCustom
         }
     }
 

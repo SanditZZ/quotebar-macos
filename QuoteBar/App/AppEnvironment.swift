@@ -21,6 +21,7 @@ final class AppEnvironment {
     let tracker: QuoteTracker
     let launchAtLogin: LaunchAtLoginService
     let hotKeyService = GlobalHotKeyService()
+    let customQuoteLibrary: CustomQuoteLibrary
 
     /// True when the on-disk store could not be opened and history is being
     /// held in memory only. Surfaced in the UI rather than failing silently.
@@ -51,9 +52,15 @@ final class AppEnvironment {
 
         self.isEphemeral = ephemeral
         self.launchAtLogin = LaunchAtLoginService()
+
+        let customQuoteRepository = SwiftDataCustomQuoteRepository(container: container)
+        self.customQuoteLibrary = CustomQuoteLibrary(repository: customQuoteRepository)
+
         self.tracker = QuoteTracker(
             repository: SwiftDataQuoteRepository(container: container),
-            provider: QuoteProviderService(),
+            provider: QuoteProviderService(
+                pinnedOnlyProviders: [CustomQuoteProvider(repository: customQuoteRepository)]
+            ),
             settings: settings,
             isEphemeral: ephemeral
         )

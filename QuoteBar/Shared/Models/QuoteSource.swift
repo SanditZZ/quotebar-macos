@@ -24,6 +24,14 @@ enum QuoteSource: String, Codable, Sendable, CaseIterable, Identifiable {
     /// Served from the bundled offline set (`Resources/BackupQuotes.json`).
     case bundled
 
+    /// Added or imported by the user into their own library. Unlike the
+    /// other three tiers, this is never part of the automatic fallback
+    /// order — it only serves quotes when explicitly pinned via
+    /// `AppSettings.preferredSource`, since silently mixing a user's own
+    /// quotes into automatic rotation would surprise anyone who added one
+    /// without expecting their whole rotation to change.
+    case custom
+
     var id: String { rawValue }
 
     /// Short label for the source badge on the quote card.
@@ -32,6 +40,7 @@ enum QuoteSource: String, Codable, Sendable, CaseIterable, Identifiable {
         case .onDeviceAI: return "AI"
         case .zenQuotes, .dummyJSON: return "WEB"
         case .bundled: return "OFFLINE"
+        case .custom: return "MINE"
         }
     }
 
@@ -42,6 +51,7 @@ enum QuoteSource: String, Codable, Sendable, CaseIterable, Identifiable {
         case .zenQuotes: return "ZenQuotes"
         case .dummyJSON: return "DummyJSON"
         case .bundled: return "Bundled offline set"
+        case .custom: return "Your Quotes"
         }
     }
 
@@ -51,6 +61,7 @@ enum QuoteSource: String, Codable, Sendable, CaseIterable, Identifiable {
         case .onDeviceAI: return "apple.intelligence"
         case .zenQuotes, .dummyJSON: return "network"
         case .bundled: return "internaldrive"
+        case .custom: return "text.badge.plus"
         }
     }
 }

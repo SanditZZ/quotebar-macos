@@ -35,15 +35,24 @@ final class QuoteProviderService: QuoteProviderServicing, @unchecked Sendable {
     ///   - onDeviceAI: Tier 1. Defaults to `FoundationModelsQuoteProvider`.
     ///   - networkProviders: Tiers 2–3, tried in order. Defaults to
     ///     `[ZenQuotesProvider, DummyJSONQuotesProvider]`.
+    ///   - pinnedOnlyProviders: Registered so they can be resolved when
+    ///     explicitly pinned, but never added to `defaultOrder` — see
+    ///     `CustomQuoteProvider` for why. Defaults to `[CustomQuoteProvider]`
+    ///     wired to a real repository via `AppEnvironment`; callers that
+    ///     don't need it (most tests) can leave this empty.
     ///   - bundled: Tier 4, the guaranteed fallback.
     init(
         onDeviceAI: any QuoteProvider = FoundationModelsQuoteProvider(),
         networkProviders: [any QuoteProvider] = [ZenQuotesProvider(), DummyJSONQuotesProvider()],
+        pinnedOnlyProviders: [any QuoteProvider] = [],
         bundled: BundledQuoteProvider = BundledQuoteProvider()
     ) {
         self.defaultOrder = [onDeviceAI.source] + networkProviders.map(\.source)
         var providersBySource: [QuoteSource: any QuoteProvider] = [onDeviceAI.source: onDeviceAI]
         for provider in networkProviders {
+            providersBySource[provider.source] = provider
+        }
+        for provider in pinnedOnlyProviders {
             providersBySource[provider.source] = provider
         }
         self.providersBySource = providersBySource

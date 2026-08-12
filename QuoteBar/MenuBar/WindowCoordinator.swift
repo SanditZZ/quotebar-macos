@@ -17,6 +17,7 @@ final class WindowCoordinator {
     private let settings: AppSettings
     private let launchAtLogin: LaunchAtLoginService
     private let hotKeyService: GlobalHotKeyService
+    private let customQuoteLibrary: CustomQuoteLibrary
 
     private var historyWindow: NSWindow?
     private var settingsWindow: NSWindow?
@@ -25,12 +26,14 @@ final class WindowCoordinator {
         tracker: QuoteTracker,
         settings: AppSettings,
         launchAtLogin: LaunchAtLoginService,
-        hotKeyService: GlobalHotKeyService
+        hotKeyService: GlobalHotKeyService,
+        customQuoteLibrary: CustomQuoteLibrary
     ) {
         self.tracker = tracker
         self.settings = settings
         self.launchAtLogin = launchAtLogin
         self.hotKeyService = hotKeyService
+        self.customQuoteLibrary = customQuoteLibrary
     }
 
     // MARK: - Actions
@@ -69,7 +72,8 @@ final class WindowCoordinator {
                 tracker: tracker,
                 settings: settings,
                 launchAtLogin: launchAtLogin,
-                hotKeyService: hotKeyService
+                hotKeyService: hotKeyService,
+                customQuoteLibrary: customQuoteLibrary
             )
         )
         settingsWindow = window
