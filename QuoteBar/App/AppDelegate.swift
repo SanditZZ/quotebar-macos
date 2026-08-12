@@ -92,18 +92,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
 // MARK: - UNUserNotificationCenterDelegate
 
-// IMPORTANT — verify against Xcode 26 before relying on this: written on a
-// Linux machine with no UserNotifications headers to compile against. The
-// async overloads below rely on Swift's standard completion-handler-to-async
-// bridging for `@objc optional` delegate methods, a long-standing, widely
-// used pattern — confirm the first time this builds on a Mac, via
-// `./scripts/ci-local.sh`.
+// `UNUserNotificationCenterDelegate`'s methods aren't `@MainActor` and their
+// parameters (`UNUserNotificationCenter`, `UNNotification`,
+// `UNNotificationResponse`) aren't `Sendable`, so a `@MainActor`-isolated
+// implementation can't accept them directly under Swift 6's strict
+// concurrency checking — confirmed by a real CI build failure, not a
+// hypothetical. `nonisolated` on each method avoids the isolation crossing;
+// `MainActor.run` hops back in only for the main-actor state each one needs.
 extension AppDelegate: UNUserNotificationCenterDelegate {
 
     /// Shows the banner and plays the sound even while QuoteBar happens to
     /// be frontmost — an accessory app rarely is, but a silently-swallowed
     /// notification would violate "never fail silently" if it ever is.
-    func userNotificationCenter(
+    nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification
     ) async -> UNNotificationPresentationOptions {
@@ -113,11 +114,13 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     /// Fired when the user taps the daily quote notification. Same outcome
     /// as the global "New Quote" shortcut: open the popover, then fetch a
     /// fresh quote through the existing provider chain.
-    func userNotificationCenter(
+    nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse
     ) async {
         AppLog.notifications.info("[Notifications] Tapped daily quote notification")
-        menuBarController?.triggerFromGlobalHotKey()
+        await MainActor.run {
+            self.menuBarController?.triggerFromGlobalHotKey()
+        }
     }
 }
