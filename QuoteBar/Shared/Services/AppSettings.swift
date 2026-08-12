@@ -26,6 +26,8 @@ final class AppSettings {
         static let hotKeyCombination = "hotKeyCombination"
         static let hotKeyEnabled = "hotKeyEnabled"
         static let shareCardStyle = "shareCardStyle"
+        static let notificationsEnabled = "notificationsEnabled"
+        static let notificationTime = "notificationTime"
     }
 
     // MARK: - Data
@@ -63,6 +65,27 @@ final class AppSettings {
         }
     }
 
+    /// Whether the daily "Quote of the Day" notification is turned on. The
+    /// one setting in the app that requires explicit opt-in — enabling it
+    /// triggers an OS permission prompt — so unlike every other setting here
+    /// this defaults to `false`. This is the user's *intent*; whether a
+    /// notification is actually scheduled also depends on OS authorization,
+    /// tracked separately by `QuoteNotificationService`.
+    var notificationsEnabled: Bool {
+        didSet { defaults.set(notificationsEnabled, forKey: Key.notificationsEnabled) }
+    }
+
+    /// Time of day the daily notification fires. Kept even while
+    /// `notificationsEnabled` is `false`, so re-enabling restores the user's
+    /// last choice instead of resetting to the default.
+    var notificationTime: NotificationTime {
+        didSet {
+            if let encoded = try? JSONEncoder().encode(notificationTime) {
+                defaults.set(encoded, forKey: Key.notificationTime)
+            }
+        }
+    }
+
     // MARK: - Lifecycle
 
     init(defaults: UserDefaults = .standard) {
@@ -78,6 +101,10 @@ final class AppSettings {
         let storedCombination = defaults.data(forKey: Key.hotKeyCombination)
             .flatMap { try? JSONDecoder().decode(HotKeyCombination.self, from: $0) }
         self.hotKeyCombination = hotKeyEnabled ? (storedCombination ?? .default) : nil
+
+        self.notificationsEnabled = defaults.object(forKey: Key.notificationsEnabled) as? Bool ?? false
+        self.notificationTime = defaults.data(forKey: Key.notificationTime)
+            .flatMap { try? JSONDecoder().decode(NotificationTime.self, from: $0) } ?? .default
     }
 
     // MARK: - Actions
@@ -87,6 +114,8 @@ final class AppSettings {
         preferredSource = nil
         hotKeyCombination = .default
         shareCardStyle = .midnight
+        notificationsEnabled = false
+        notificationTime = .default
         AppLog.settings.info("[Settings] Restored defaults")
     }
 }

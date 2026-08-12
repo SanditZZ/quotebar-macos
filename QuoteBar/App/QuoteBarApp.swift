@@ -21,6 +21,7 @@ struct QuoteBarApp: App {
                 settings: AppEnvironment.shared.settings,
                 launchAtLogin: AppEnvironment.shared.launchAtLogin,
                 hotKeyService: AppEnvironment.shared.hotKeyService,
+                notificationService: AppEnvironment.shared.notificationService,
                 customQuoteLibrary: AppEnvironment.shared.customQuoteLibrary
             )
         }

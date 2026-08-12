@@ -8,6 +8,7 @@
 
 import AppKit
 import SwiftUI
+import UserNotifications
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
@@ -27,6 +28,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             settings: environment.settings,
             launchAtLogin: environment.launchAtLogin,
             hotKeyService: environment.hotKeyService,
+            notificationService: environment.notificationService,
             customQuoteLibrary: environment.customQuoteLibrary
         )
         menuBarController?.install()
@@ -35,6 +37,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             menuBarController?.triggerFromGlobalHotKey()
         }
         environment.hotKeyService.updateCombination(environment.settings.hotKeyCombination)
+
+        UNUserNotificationCenter.current().delegate = self
+        Task {
+            await environment.notificationService.apply(
+                enabled: environment.settings.notificationsEnabled,
+                time: environment.settings.notificationTime
+            )
+        }
 
         // Show a first quote immediately so the popover is never empty on
         // first open.
@@ -76,6 +86,41 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             MainActor.assumeIsolated {
                 AppEnvironment.shared.tracker.flush()
             }
+        }
+    }
+}
+
+// MARK: - UNUserNotificationCenterDelegate
+
+// `UNUserNotificationCenterDelegate`'s methods aren't `@MainActor` and their
+// parameters (`UNUserNotificationCenter`, `UNNotification`,
+// `UNNotificationResponse`) aren't `Sendable`, so a `@MainActor`-isolated
+// implementation can't accept them directly under Swift 6's strict
+// concurrency checking — confirmed by a real CI build failure, not a
+// hypothetical. `nonisolated` on each method avoids the isolation crossing;
+// `MainActor.run` hops back in only for the main-actor state each one needs.
+extension AppDelegate: UNUserNotificationCenterDelegate {
+
+    /// Shows the banner and plays the sound even while QuoteBar happens to
+    /// be frontmost — an accessory app rarely is, but a silently-swallowed
+    /// notification would violate "never fail silently" if it ever is.
+    nonisolated func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification
+    ) async -> UNNotificationPresentationOptions {
+        [.banner, .sound]
+    }
+
+    /// Fired when the user taps the daily quote notification. Same outcome
+    /// as the global "New Quote" shortcut: open the popover, then fetch a
+    /// fresh quote through the existing provider chain.
+    nonisolated func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse
+    ) async {
+        AppLog.notifications.info("[Notifications] Tapped daily quote notification")
+        await MainActor.run {
+            self.menuBarController?.triggerFromGlobalHotKey()
         }
     }
 }

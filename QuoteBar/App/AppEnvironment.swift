@@ -21,6 +21,7 @@ final class AppEnvironment {
     let tracker: QuoteTracker
     let launchAtLogin: LaunchAtLoginService
     let hotKeyService = GlobalHotKeyService()
+    let notificationService = QuoteNotificationService()
     let customQuoteLibrary: CustomQuoteLibrary
 
     /// True when the on-disk store could not be opened and history is being
