@@ -88,6 +88,23 @@ enum AppColors {
     static func tint(_ color: Color, opacity: Double = 0.14) -> Color {
         color.opacity(opacity)
     }
+
+    // MARK: - Share Card
+
+    /// Fixed-tone colors for the exported share image — deliberately not
+    /// appearance-adaptive, unlike everything else in this file. See
+    /// `ShareCardStyle`'s doc comment for why.
+
+    static let shareMidnightBackgroundTop = Color(red: 0.075, green: 0.102, blue: 0.169)
+    static let shareMidnightBackgroundBottom = Color(red: 0.043, green: 0.059, blue: 0.102)
+    static let shareMidnightText = Color(red: 0.953, green: 0.961, blue: 0.980)
+    static let shareMidnightTextSecondary = Color(red: 0.953, green: 0.961, blue: 0.980).opacity(0.6)
+    static let shareMidnightAccent = Color(red: 0.353, green: 0.588, blue: 1.0)
+
+    static let sharePaperBackground = Color(red: 0.957, green: 0.941, blue: 0.910)
+    static let sharePaperText = Color(red: 0.102, green: 0.110, blue: 0.122)
+    static let sharePaperTextSecondary = Color(red: 0.102, green: 0.110, blue: 0.122).opacity(0.58)
+    static let sharePaperAccent = Color(red: 0.196, green: 0.478, blue: 0.918)
 }
 
 // MARK: - Adaptive Colors

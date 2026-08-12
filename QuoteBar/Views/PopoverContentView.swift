@@ -12,6 +12,7 @@ struct PopoverContentView: View {
     var tracker: QuoteTracker
     let onOpenHistory: () -> Void
     let onOpenSettings: () -> Void
+    let onShare: () -> Void
     let onQuit: () -> Void
 
     var body: some View {
@@ -68,6 +69,8 @@ struct PopoverContentView: View {
     private var footer: some View {
         HStack(spacing: DesignTokens.Spacing.medium) {
             footerButton("History", systemImage: "clock", action: onOpenHistory)
+            footerButton("Share", systemImage: "square.and.arrow.up", action: onShare)
+                .disabled(tracker.currentQuote == nil)
             footerButton("Settings", systemImage: "gearshape", action: onOpenSettings)
             Spacer()
             footerButton("Quit", systemImage: "power", action: onQuit)
@@ -94,6 +97,7 @@ struct PopoverContentView: View {
         ),
         onOpenHistory: {},
         onOpenSettings: {},
+        onShare: {},
         onQuit: {}
     )
 }

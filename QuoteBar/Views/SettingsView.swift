@@ -26,6 +26,7 @@ struct SettingsView: View {
                 shortcutSection
                 quoteSourceSection
                 yourQuotesSection
+                sharingSection
                 dataSection
                 aboutSection
             }
@@ -126,6 +127,52 @@ struct SettingsView: View {
         section(title: "Your Quotes") {
             CustomQuotesEditor(library: customQuoteLibrary)
         }
+    }
+
+    // MARK: - Sharing
+
+    private var sharingSection: some View {
+        section(title: "Sharing") {
+            HStack(spacing: DesignTokens.Spacing.medium) {
+                ForEach(ShareCardStyle.allCases) { style in
+                    shareStyleSwatch(style)
+                }
+            }
+
+            Text("Used when you share a quote as an image from the popover or the menu bar's right-click menu.")
+                .font(DesignTokens.Typography.caption)
+                .foregroundStyle(AppColors.textTertiary)
+        }
+    }
+
+    private func shareStyleSwatch(_ style: ShareCardStyle) -> some View {
+        let isSelected = settings.shareCardStyle == style
+        let background = style == .midnight ? AppColors.shareMidnightBackgroundBottom : AppColors.sharePaperBackground
+        let foreground = style == .midnight ? AppColors.shareMidnightText : AppColors.sharePaperText
+
+        return Button {
+            settings.shareCardStyle = style
+        } label: {
+            VStack(spacing: DesignTokens.Spacing.extraSmall) {
+                RoundedRectangle(cornerRadius: DesignTokens.Radius.small)
+                    .fill(background)
+                    .frame(width: 64, height: 64)
+                    .overlay(
+                        Text("Aa")
+                            .font(DesignTokens.Typography.bodyMedium)
+                            .foregroundStyle(foreground)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: DesignTokens.Radius.small)
+                            .strokeBorder(isSelected ? AppColors.accent : Color.clear, lineWidth: 2)
+                    )
+
+                Text(style.displayName)
+                    .font(DesignTokens.Typography.caption)
+                    .foregroundStyle(isSelected ? AppColors.textPrimary : AppColors.textSecondary)
+            }
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Data
