@@ -22,6 +22,7 @@ final class AppSettings {
 
     private enum Key {
         static let confirmBeforeClearHistory = "confirmBeforeClearHistory"
+        static let preferredSource = "preferredSource"
     }
 
     // MARK: - Data
@@ -33,18 +34,27 @@ final class AppSettings {
         didSet { defaults.set(confirmBeforeClearHistory, forKey: Key.confirmBeforeClearHistory) }
     }
 
+    /// Pin the provider chain to a single source instead of the automatic
+    /// fallback order. `nil` means automatic — the default.
+    var preferredSource: QuoteSource? {
+        didSet { defaults.set(preferredSource?.rawValue, forKey: Key.preferredSource) }
+    }
+
     // MARK: - Lifecycle
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         self.confirmBeforeClearHistory =
             defaults.object(forKey: Key.confirmBeforeClearHistory) as? Bool ?? true
+        self.preferredSource =
+            (defaults.string(forKey: Key.preferredSource)).flatMap(QuoteSource.init(rawValue:))
     }
 
     // MARK: - Actions
 
     func resetToDefaults() {
         confirmBeforeClearHistory = true
+        preferredSource = nil
         AppLog.settings.info("[Settings] Restored defaults")
     }
 }

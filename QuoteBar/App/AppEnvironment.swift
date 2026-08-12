@@ -53,6 +53,7 @@ final class AppEnvironment {
         self.tracker = QuoteTracker(
             repository: SwiftDataQuoteRepository(container: container),
             provider: QuoteProviderService(),
+            settings: settings,
             isEphemeral: ephemeral
         )
 

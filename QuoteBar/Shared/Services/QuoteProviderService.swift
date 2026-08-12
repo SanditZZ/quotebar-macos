@@ -14,7 +14,12 @@ protocol QuoteProviderServicing: Sendable {
     /// Fetch the next quote, avoiding (where possible) anything whose text
     /// appears in `recentTexts`. Always returns a quote — the bundled tier is
     /// the guaranteed last resort.
-    func nextQuote(recentTexts: [String]) async -> Quote
+    ///
+    /// - Parameter preference: `nil` tries every tier in the default order.
+    ///   A specific source tries only that source, then falls through to
+    ///   `bundled` — see `ProviderChainSelector` for why no other tier is
+    ///   substituted in between.
+    func nextQuote(recentTexts: [String], preference: QuoteSource?) async -> Quote
 }
 
 /// `@unchecked Sendable`: every stored property is a `let`-bound `Sendable`
@@ -22,8 +27,8 @@ protocol QuoteProviderServicing: Sendable {
 /// mutated afterward.
 final class QuoteProviderService: QuoteProviderServicing, @unchecked Sendable {
 
-    private let onDeviceAI: any QuoteProvider
-    private let networkProviders: [any QuoteProvider]
+    private let defaultOrder: [QuoteSource]
+    private let providersBySource: [QuoteSource: any QuoteProvider]
     private let bundled: BundledQuoteProvider
 
     /// - Parameters:
@@ -36,25 +41,35 @@ final class QuoteProviderService: QuoteProviderServicing, @unchecked Sendable {
         networkProviders: [any QuoteProvider] = [ZenQuotesProvider(), DummyJSONQuotesProvider()],
         bundled: BundledQuoteProvider = BundledQuoteProvider()
     ) {
-        self.onDeviceAI = onDeviceAI
-        self.networkProviders = networkProviders
+        self.defaultOrder = [onDeviceAI.source] + networkProviders.map(\.source)
+        var providersBySource: [QuoteSource: any QuoteProvider] = [onDeviceAI.source: onDeviceAI]
+        for provider in networkProviders {
+            providersBySource[provider.source] = provider
+        }
+        self.providersBySource = providersBySource
         self.bundled = bundled
     }
 
-    func nextQuote(recentTexts: [String]) async -> Quote {
-        if let quote = await tryProvider(onDeviceAI, recentTexts: recentTexts) {
-            return quote
-        }
+    func nextQuote(recentTexts: [String], preference: QuoteSource?) async -> Quote {
+        let order = ProviderChainSelector.resolvedOrder(
+            preference: preference,
+            defaultOrder: defaultOrder,
+            bundled: bundled.source
+        )
 
-        for provider in networkProviders {
+        for source in order {
+            if source == bundled.source {
+                if let quote = await bundled.nextQuote(recentTexts: recentTexts) {
+                    AppLog.quote.info("[Quote] Served from bundled")
+                    return quote
+                }
+                continue
+            }
+
+            guard let provider = providersBySource[source] else { continue }
             if let quote = await tryProvider(provider, recentTexts: recentTexts) {
                 return quote
             }
-        }
-
-        if let quote = await bundled.nextQuote(recentTexts: recentTexts) {
-            AppLog.quote.info("[Quote] Served from bundled")
-            return quote
         }
 
         // BundledQuoteProvider only returns nil if BackupQuotes.json itself is

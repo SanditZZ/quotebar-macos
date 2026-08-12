@@ -12,8 +12,8 @@
 import Foundation
 
 protocol QuoteProvider: Sendable {
-    /// Which source this provider represents, for tagging the returned quote
-    /// and for logging.
+    /// Which source this provider represents, for tagging the returned quote,
+    /// for logging, and for matching against a pinned `AppSettings.preferredSource`.
     var source: QuoteSource { get }
 
     /// Fetch one quote, or `nil` if this tier could not produce one right now.
