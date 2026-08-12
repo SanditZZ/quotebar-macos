@@ -6,6 +6,7 @@
 //  this project's design conventions (see idle-tapper-macos's UI review).
 //
 
+import AVFoundation
 import SwiftUI
 
 struct SettingsView: View {
@@ -19,6 +20,7 @@ struct SettingsView: View {
     var backupService: QuoteBackupService
 
     @State private var showingClearConfirmation = false
+    @State private var voices: [AVSpeechSynthesisVoice] = []
 
     private static let sectionWidth: CGFloat = 400
 
@@ -32,6 +34,7 @@ struct SettingsView: View {
                 yourQuotesSection
                 tagsSection
                 sharingSection
+                readAloudSection
                 dataSection
                 backupSection
                 aboutSection
@@ -42,6 +45,7 @@ struct SettingsView: View {
         .onAppear {
             launchAtLogin.refresh()
             Task { await notificationService.refreshAuthorizationStatus() }
+            voices = AVSpeechSynthesisVoice.speechVoices().sorted { $0.name < $1.name }
         }
         .onChange(of: settings.hotKeyCombination) { _, newValue in
             hotKeyService.updateCombination(newValue)
@@ -238,6 +242,47 @@ struct SettingsView: View {
             }
         }
         .buttonStyle(.plain)
+    }
+
+    // MARK: - Read Aloud
+
+    private var readAloudSection: some View {
+        section(title: "Read Aloud") {
+            Picker("Voice", selection: voiceBinding) {
+                Text("System Default").tag(String?.none)
+                ForEach(voices, id: \.identifier) { voice in
+                    Text(voice.name).tag(String?.some(voice.identifier))
+                }
+            }
+            .pickerStyle(.menu)
+
+            HStack {
+                Text("Speed")
+                Slider(
+                    value: speechRateBinding,
+                    in: AVSpeechUtteranceMinimumSpeechRate...AVSpeechUtteranceMaximumSpeechRate
+                )
+            }
+            .font(DesignTokens.Typography.body)
+
+            Text("Used by the \"Read Aloud\" button in the popover and the menu bar's right-click menu.")
+                .font(DesignTokens.Typography.caption)
+                .foregroundStyle(AppColors.textTertiary)
+        }
+    }
+
+    private var voiceBinding: Binding<String?> {
+        Binding(
+            get: { settings.preferredVoiceIdentifier },
+            set: { settings.preferredVoiceIdentifier = $0 }
+        )
+    }
+
+    private var speechRateBinding: Binding<Float> {
+        Binding(
+            get: { settings.speechRate },
+            set: { settings.speechRate = $0 }
+        )
     }
 
     // MARK: - Data

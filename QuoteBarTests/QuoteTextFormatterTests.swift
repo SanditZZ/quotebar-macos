@@ -50,4 +50,10 @@ struct QuoteTextFormatterTests {
         #expect(QuoteTextFormatter.attribution(author: "Seneca") == "— Seneca")
         #expect(QuoteTextFormatter.attribution(author: nil) == "— Unknown")
     }
+
+    @Test("Spoken text spells out the author rather than using an em dash")
+    func spokenTextSpellsOutAuthor() {
+        #expect(QuoteTextFormatter.spokenText(text: "Carpe diem", author: "Horace") == "Carpe diem. By Horace.")
+        #expect(QuoteTextFormatter.spokenText(text: "Carpe diem", author: nil) == "Carpe diem. By Unknown.")
+    }
 }

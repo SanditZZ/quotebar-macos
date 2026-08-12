@@ -39,4 +39,11 @@ enum QuoteTextFormatter {
     static func attribution(author: String?) -> String {
         "— \(authorDisplay(author))"
     }
+
+    /// Text for AVSpeechSynthesizer to read aloud. Spells out "By <author>"
+    /// rather than reusing `attribution`'s em dash, since some voices read
+    /// "—" literally as "dash."
+    static func spokenText(text: String, author: String?) -> String {
+        "\(text). By \(authorDisplay(author))."
+    }
 }

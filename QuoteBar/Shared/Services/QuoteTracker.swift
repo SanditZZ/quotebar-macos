@@ -7,6 +7,7 @@
 //  to either directly.
 //
 
+import AVFoundation
 import Foundation
 import Observation
 
@@ -41,11 +42,15 @@ final class QuoteTracker {
     /// when automatic, or when the pin was honored.
     private(set) var pinnedSourceFallbackMessage: String?
 
+    /// True while "Read Aloud" is speaking the current quote.
+    private(set) var isSpeaking = false
+
     // MARK: - Dependencies
 
     private let repository: any QuoteRepository
     private let provider: any QuoteProviderServicing
     private let settings: AppSettings
+    private let speechService: QuoteSpeechService
 
     /// How many recent quotes to avoid repeating.
     private let recentHistoryWindow: Int
@@ -57,14 +62,24 @@ final class QuoteTracker {
         provider: any QuoteProviderServicing,
         settings: AppSettings,
         isEphemeral: Bool,
+        speechService: QuoteSpeechService? = nil,
         recentHistoryWindow: Int = 10
     ) {
         self.repository = repository
         self.provider = provider
         self.settings = settings
         self.isEphemeral = isEphemeral
+        // A default-value expression in the signature above would run in the
+        // caller's (nonisolated) context and couldn't call this @MainActor
+        // initializer — confirmed by a real CI build failure — so the
+        // fallback instance is constructed here instead, inside this
+        // @MainActor init's body.
+        self.speechService = speechService ?? QuoteSpeechService()
         self.recentHistoryWindow = recentHistoryWindow
         refresh()
+        self.speechService.start { [weak self] isSpeaking in
+            self?.isSpeaking = isSpeaking
+        }
     }
 
     // MARK: - Actions
@@ -72,6 +87,7 @@ final class QuoteTracker {
     /// Fetch and persist a new quote, replacing `currentQuote`.
     func requestNewQuote() async {
         guard !isFetching else { return }
+        stopSpeaking()
         isFetching = true
         defer { isFetching = false }
 
@@ -156,6 +172,26 @@ final class QuoteTracker {
     /// or when the popover closes.
     func flush() {
         try? repository.flush()
+    }
+
+    /// Speak the current quote's text and attribution aloud.
+    func speakCurrentQuote() {
+        guard let quote = currentQuote else { return }
+        let availableIdentifiers = AVSpeechSynthesisVoice.speechVoices().map(\.identifier)
+        let voiceIdentifier = SpeechVoiceResolver.resolve(
+            storedIdentifier: settings.preferredVoiceIdentifier,
+            availableIdentifiers: availableIdentifiers
+        )
+        speechService.speak(
+            text: QuoteTextFormatter.spokenText(text: quote.text, author: quote.author),
+            voiceIdentifier: voiceIdentifier,
+            rate: settings.speechRate
+        )
+    }
+
+    /// Stop any in-progress narration immediately.
+    func stopSpeaking() {
+        speechService.stop()
     }
 
     // MARK: - Calculations

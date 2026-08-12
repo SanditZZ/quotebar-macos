@@ -38,10 +38,6 @@ Both "Your Quotes" and the new "Backup" section only accept files via an explici
 
 Reuse the existing `QuoteImageRenderer`/`ShareCardStyle` pipeline (built for sharing) to render the current quote and set it as the desktop picture instead of just sharing it. Non-trivial part: a sandboxed app can't call `NSWorkspace.setDesktopImageURL` on an arbitrary path — the rendered image has to be written to a location the app can pass a `file://` URL for (e.g. its own container's `Application Support`), and multi-display setups mean iterating `NSScreen.screens` rather than assuming a single screen.
 
-## Read quote aloud
-
-An accessibility/hands-free option using `AVSpeechSynthesizer` to read the current card's text and author. Non-trivial part: needs a new speak/stop action and state (`isSpeaking`) in `QuoteTracker` that doesn't block `requestNewQuote()`, a voice-selection setting in `AppSettings`, and a decision on whether speech auto-cancels when the popover closes or a new quote is fetched mid-utterance.
-
 ## Menu bar marquee text mode
 
 A toggle to show a short excerpt of the quote directly in the menu bar (as title text next to or instead of the icon), not just an icon. Non-trivial part: `StatusItemRenderer` is icon-only today; adding text means truncation/ellipsis logic, correct `NSStatusItem` auto-resizing, and refreshing the title whenever `QuoteTracker.currentQuote` changes even while the popover is closed — nothing currently observes the tracker outside SwiftUI views.
@@ -56,4 +52,4 @@ A "Favorites Mode" toggle that serves only from the user's already-favorited quo
 
 ## Quick actions from the menu bar right-click menu
 
-Extend the right-click `NSMenu` in `MenuBarController` with "Copy Quote", "Favorite This Quote", and "Read Aloud" so common actions don't require opening the popover at all. Non-trivial part: `showContextMenu()` currently rebuilds the menu synchronously from `tracker.currentQuote`, but favoriting/copying needs to update state and (for copy) write to `NSPasteboard` while respecting the same `isFetching`/error-message invariants `PopoverContentView` already encodes — duplicating that logic outside SwiftUI risks it drifting out of sync with the view's behavior.
+Extend the right-click `NSMenu` in `MenuBarController` with "Copy Quote" and "Favorite This Quote" so common actions don't require opening the popover at all (Read Aloud already shipped there). Non-trivial part: `showContextMenu()` currently rebuilds the menu synchronously from `tracker.currentQuote`, but favoriting/copying needs to update state and (for copy) write to `NSPasteboard` while respecting the same `isFetching`/error-message invariants `PopoverContentView` already encodes — duplicating that logic outside SwiftUI risks it drifting out of sync with the view's behavior.
