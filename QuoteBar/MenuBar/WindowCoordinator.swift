@@ -16,14 +16,21 @@ final class WindowCoordinator {
     private let tracker: QuoteTracker
     private let settings: AppSettings
     private let launchAtLogin: LaunchAtLoginService
+    private let hotKeyService: GlobalHotKeyService
 
     private var historyWindow: NSWindow?
     private var settingsWindow: NSWindow?
 
-    init(tracker: QuoteTracker, settings: AppSettings, launchAtLogin: LaunchAtLoginService) {
+    init(
+        tracker: QuoteTracker,
+        settings: AppSettings,
+        launchAtLogin: LaunchAtLoginService,
+        hotKeyService: GlobalHotKeyService
+    ) {
         self.tracker = tracker
         self.settings = settings
         self.launchAtLogin = launchAtLogin
+        self.hotKeyService = hotKeyService
     }
 
     // MARK: - Actions
@@ -58,7 +65,12 @@ final class WindowCoordinator {
             title: "QuoteBar Settings",
             size: DesignTokens.Layout.settingsWindowSize,
             minSize: DesignTokens.Layout.settingsWindowMinSize,
-            content: SettingsView(tracker: tracker, settings: settings, launchAtLogin: launchAtLogin)
+            content: SettingsView(
+                tracker: tracker,
+                settings: settings,
+                launchAtLogin: launchAtLogin,
+                hotKeyService: hotKeyService
+            )
         )
         settingsWindow = window
         present(window)

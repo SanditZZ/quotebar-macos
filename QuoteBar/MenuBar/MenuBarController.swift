@@ -35,12 +35,18 @@ final class MenuBarController {
     /// milliseconds of a close fixes that.
     private var lastCloseDate: Date = .distantPast
 
-    init(tracker: QuoteTracker, settings: AppSettings, launchAtLogin: LaunchAtLoginService) {
+    init(
+        tracker: QuoteTracker,
+        settings: AppSettings,
+        launchAtLogin: LaunchAtLoginService,
+        hotKeyService: GlobalHotKeyService
+    ) {
         self.tracker = tracker
         self.windowCoordinator = WindowCoordinator(
             tracker: tracker,
             settings: settings,
-            launchAtLogin: launchAtLogin
+            launchAtLogin: launchAtLogin,
+            hotKeyService: hotKeyService
         )
     }
 
@@ -63,6 +69,19 @@ final class MenuBarController {
     }
 
     // MARK: - Actions
+
+    /// Fired by the global "New Quote" shortcut. Opens the popover if it
+    /// wasn't already showing, then always fetches a new quote — the same
+    /// outcome as clicking the status item and pressing "New Quote".
+    func triggerFromGlobalHotKey() {
+        guard let button = statusItem?.button else { return }
+
+        if popover?.isShown != true {
+            showPopover(from: button)
+        }
+
+        Task { await tracker.requestNewQuote() }
+    }
 
     @objc private func statusItemClicked() {
         guard let event = NSApp.currentEvent else {

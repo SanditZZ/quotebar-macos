@@ -12,6 +12,7 @@ struct SettingsView: View {
     var tracker: QuoteTracker
     var settings: AppSettings
     var launchAtLogin: LaunchAtLoginService
+    var hotKeyService: GlobalHotKeyService
 
     @State private var showingClearConfirmation = false
 
@@ -21,6 +22,7 @@ struct SettingsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: DesignTokens.Spacing.section) {
                 generalSection
+                shortcutSection
                 quoteSourceSection
                 dataSection
                 aboutSection
@@ -29,6 +31,33 @@ struct SettingsView: View {
             .frame(width: Self.sectionWidth)
         }
         .onAppear { launchAtLogin.refresh() }
+        .onChange(of: settings.hotKeyCombination) { _, newValue in
+            hotKeyService.updateCombination(newValue)
+        }
+    }
+
+    // MARK: - Shortcut
+
+    private var shortcutSection: some View {
+        section(title: "Shortcut") {
+            HStack {
+                Text("New Quote")
+                Spacer()
+                ShortcutRecorderField(combination: hotKeyBinding)
+            }
+            .font(DesignTokens.Typography.body)
+
+            Text("Works system-wide, even while QuoteBar isn't in front. Opens the popover and fetches a new quote.")
+                .font(DesignTokens.Typography.caption)
+                .foregroundStyle(AppColors.textTertiary)
+        }
+    }
+
+    private var hotKeyBinding: Binding<HotKeyCombination?> {
+        Binding(
+            get: { settings.hotKeyCombination },
+            set: { settings.hotKeyCombination = $0 }
+        )
     }
 
     // MARK: - General
@@ -186,6 +215,7 @@ struct SettingsView: View {
             isEphemeral: false
         ),
         settings: AppSettings(defaults: UserDefaults(suiteName: "preview")!),
-        launchAtLogin: LaunchAtLoginService()
+        launchAtLogin: LaunchAtLoginService(),
+        hotKeyService: GlobalHotKeyService()
     )
 }
