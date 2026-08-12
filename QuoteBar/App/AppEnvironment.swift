@@ -24,6 +24,7 @@ final class AppEnvironment {
     let notificationService = QuoteNotificationService()
     let customQuoteLibrary: CustomQuoteLibrary
     let tagLibrary: QuoteTagLibrary
+    let backupService: QuoteBackupService
 
     /// True when the on-disk store could not be opened and history is being
     /// held in memory only. Surfaced in the UI rather than failing silently.
@@ -61,8 +62,14 @@ final class AppEnvironment {
         let quoteTagRepository = SwiftDataQuoteTagRepository(container: container)
         self.tagLibrary = QuoteTagLibrary(repository: quoteTagRepository)
 
+        let quoteRepository = SwiftDataQuoteRepository(container: container)
+        self.backupService = QuoteBackupService(
+            quoteRepository: quoteRepository,
+            customQuoteRepository: customQuoteRepository
+        )
+
         self.tracker = QuoteTracker(
-            repository: SwiftDataQuoteRepository(container: container),
+            repository: quoteRepository,
             provider: QuoteProviderService(
                 pinnedOnlyProviders: [CustomQuoteProvider(repository: customQuoteRepository)]
             ),

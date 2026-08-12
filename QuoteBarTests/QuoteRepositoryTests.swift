@@ -193,4 +193,49 @@ struct QuoteRepositoryTests {
 
         #expect(try repository.allQuotes().isEmpty)
     }
+
+    @Test("importHistory persists fresh snapshots including tags")
+    func importHistoryPersistsFreshSnapshots() throws {
+        let (repository, tagRepository) = try makeRepositoryPair()
+        let snapshot = TestSupport.snapshot(text: "Imported", tags: [TestSupport.tag(name: "Focus")])
+
+        let insertedCount = try repository.importHistory([snapshot])
+
+        #expect(insertedCount == 1)
+        let stored = try repository.allQuotes()
+        #expect(stored.map(\.text) == ["Imported"])
+        #expect(stored.first?.tags.map(\.name) == ["Focus"])
+        #expect(try tagRepository.allTags().map(\.name) == ["Focus"])
+    }
+
+    @Test("Re-importing the same snapshots by id does not duplicate them")
+    func importHistoryIsIdempotentByID() throws {
+        let repository = try makeRepository()
+        let snapshot = TestSupport.snapshot(text: "Imported")
+
+        _ = try repository.importHistory([snapshot])
+        let secondInsertedCount = try repository.importHistory([snapshot])
+
+        #expect(secondInsertedCount == 0)
+        #expect(try repository.allQuotes().count == 1)
+    }
+
+    @Test("Importing a snapshot whose tag name doesn't exist yet creates the tag")
+    func importHistoryCreatesMissingTag() throws {
+        let (repository, tagRepository) = try makeRepositoryPair()
+
+        _ = try repository.importHistory([TestSupport.snapshot(text: "X", tags: [TestSupport.tag(name: "NewTag")])])
+
+        #expect(try tagRepository.allTags().map(\.name) == ["NewTag"])
+    }
+
+    @Test("Importing a snapshot whose tag name matches an existing tag case-insensitively reuses it")
+    func importHistoryReusesExistingTagCaseInsensitively() throws {
+        let (repository, tagRepository) = try makeRepositoryPair()
+        try tagRepository.add(name: "Wisdom")
+
+        _ = try repository.importHistory([TestSupport.snapshot(text: "X", tags: [TestSupport.tag(name: "wisdom")])])
+
+        #expect(try tagRepository.allTags().count == 1)
+    }
 }

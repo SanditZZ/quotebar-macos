@@ -86,6 +86,53 @@ final class SwiftDataQuoteRepository: QuoteRepository {
         }
     }
 
+    @discardableResult
+    func importHistory(_ snapshots: [QuoteSnapshot]) throws -> Int {
+        guard !snapshots.isEmpty else { return 0 }
+
+        let existingIDs = Set(try fetchAllRecords().map(\.id))
+        var existingTags = try fetchAllTags()
+        var inserted = 0
+
+        for snapshot in snapshots where !existingIDs.contains(snapshot.id) {
+            let record = QuoteRecord(
+                id: snapshot.id,
+                text: snapshot.text,
+                author: snapshot.author,
+                source: snapshot.source,
+                seenAt: snapshot.seenAt,
+                isFavorite: snapshot.isFavorite
+            )
+            context.insert(record)
+
+            for tagSnapshot in snapshot.tags {
+                if let match = existingTags.first(where: {
+                    $0.name.localizedCaseInsensitiveCompare(tagSnapshot.name) == .orderedSame
+                }) {
+                    record.tags.append(match)
+                } else {
+                    let newTag = QuoteTag(name: tagSnapshot.name, createdAt: tagSnapshot.createdAt)
+                    context.insert(newTag)
+                    existingTags.append(newTag)
+                    record.tags.append(newTag)
+                }
+            }
+
+            inserted += 1
+        }
+
+        do {
+            try context.save()
+            AppLog.persistence.info("[Persistence] Imported history: \(inserted, privacy: .public) sightings")
+            return inserted
+        } catch {
+            AppLog.persistence.error(
+                "[Persistence] History import failed: \(error.localizedDescription, privacy: .public)"
+            )
+            throw QuoteRepositoryError.saveFailed(underlying: error)
+        }
+    }
+
     func deleteAll() throws {
         let records = try fetchAllRecords()
 

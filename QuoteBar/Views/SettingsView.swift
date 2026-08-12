@@ -16,6 +16,7 @@ struct SettingsView: View {
     var notificationService: QuoteNotificationService
     var customQuoteLibrary: CustomQuoteLibrary
     var tagLibrary: QuoteTagLibrary
+    var backupService: QuoteBackupService
 
     @State private var showingClearConfirmation = false
 
@@ -32,6 +33,7 @@ struct SettingsView: View {
                 tagsSection
                 sharingSection
                 dataSection
+                backupSection
                 aboutSection
             }
             .padding(DesignTokens.Spacing.popoverPadding)
@@ -284,6 +286,14 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: - Backup
+
+    private var backupSection: some View {
+        section(title: "Backup") {
+            BackupExportImportView(backupService: backupService)
+        }
+    }
+
     // MARK: - About
 
     private var aboutSection: some View {
@@ -342,6 +352,10 @@ struct SettingsView: View {
         hotKeyService: GlobalHotKeyService(),
         notificationService: QuoteNotificationService(),
         customQuoteLibrary: CustomQuoteLibrary(repository: SwiftDataCustomQuoteRepository(container: container)),
-        tagLibrary: QuoteTagLibrary(repository: SwiftDataQuoteTagRepository(container: container))
+        tagLibrary: QuoteTagLibrary(repository: SwiftDataQuoteTagRepository(container: container)),
+        backupService: QuoteBackupService(
+            quoteRepository: SwiftDataQuoteRepository(container: container),
+            customQuoteRepository: SwiftDataCustomQuoteRepository(container: container)
+        )
     )
 }

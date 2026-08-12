@@ -14,10 +14,12 @@
 	<true/>
 
 	<!-- Reading a JSON/CSV file the user picks via Settings' "Your Quotes"
-	     import (.fileImporter). A sandboxed app needs this to read a
-	     user-selected file at all — without it, CustomQuoteLibrary.importFile
-	     would fail on every file. -->
-	<key>com.apple.security.files.user-selected.read-only</key>
+	     import (.fileImporter), and writing an exported JSON/CSV backup file
+	     via Settings' "Backup" export (.fileExporter). A sandboxed app needs
+	     this to read or write any user-selected file at all — read-write is
+	     a superset of read-only for this entitlement family, so this single
+	     key covers both flows rather than declaring both. -->
+	<key>com.apple.security.files.user-selected.read-write</key>
 	<true/>
 </dict>
 </plist>
