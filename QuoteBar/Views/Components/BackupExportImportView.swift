@@ -7,6 +7,7 @@
 //  Presentational only — everything delegates to `QuoteBackupService`.
 //
 
+import Foundation
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -16,8 +17,8 @@ struct BackupExportImportView: View {
     @State private var showingJSONExporter = false
     @State private var showingCSVExporter = false
     @State private var showingImporter = false
-    @State private var jsonExportDocument: RawDataDocument?
-    @State private var csvExportDocument: RawDataDocument?
+    @State private var jsonExportDocument = RawDataDocument(data: Data())
+    @State private var csvExportDocument = RawDataDocument(data: Data())
 
     var body: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
