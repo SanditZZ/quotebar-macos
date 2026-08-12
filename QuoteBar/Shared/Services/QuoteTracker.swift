@@ -62,14 +62,19 @@ final class QuoteTracker {
         provider: any QuoteProviderServicing,
         settings: AppSettings,
         isEphemeral: Bool,
-        speechService: QuoteSpeechService = QuoteSpeechService(),
+        speechService: QuoteSpeechService? = nil,
         recentHistoryWindow: Int = 10
     ) {
         self.repository = repository
         self.provider = provider
         self.settings = settings
         self.isEphemeral = isEphemeral
-        self.speechService = speechService
+        // A default-value expression in the signature above would run in the
+        // caller's (nonisolated) context and couldn't call this @MainActor
+        // initializer — confirmed by a real CI build failure — so the
+        // fallback instance is constructed here instead, inside this
+        // @MainActor init's body.
+        self.speechService = speechService ?? QuoteSpeechService()
         self.recentHistoryWindow = recentHistoryWindow
         refresh()
         self.speechService.start { [weak self] isSpeaking in
