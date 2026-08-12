@@ -146,6 +146,7 @@ final class MenuBarController {
         popover?.performClose(nil)
         lastCloseDate = Date()
         outsideClickMonitor.stop()
+        tracker.stopSpeaking()
         tracker.flush()
         AppLog.menuBar.debug("[MenuBar] Popover closed")
     }
@@ -163,6 +164,12 @@ final class MenuBarController {
         menu.addItem(withTitle: "Share Quote…", action: #selector(shareCurrentQuoteFromMenu), keyEquivalent: "")
             .target = self
         menu.items.last?.isEnabled = tracker.currentQuote != nil
+        menu.addItem(
+            withTitle: tracker.isSpeaking ? "Stop Reading" : "Read Aloud",
+            action: #selector(speakOrStopCurrentQuoteFromMenu),
+            keyEquivalent: ""
+        ).target = self
+        menu.items.last?.isEnabled = tracker.isSpeaking || tracker.currentQuote != nil
         menu.addItem(withTitle: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
             .target = self
         menu.addItem(.separator())
@@ -186,6 +193,21 @@ final class MenuBarController {
 
     @objc private func shareCurrentQuoteFromMenu() {
         shareCurrentQuote()
+    }
+
+    @objc private func speakOrStopCurrentQuoteFromMenu() {
+        speakOrStopCurrentQuote()
+    }
+
+    /// Toggles narration: starts reading the current quote aloud, or stops
+    /// it if already speaking. Shared by the popover's "Read Aloud" button
+    /// and this right-click menu item.
+    private func speakOrStopCurrentQuote() {
+        if tracker.isSpeaking {
+            tracker.stopSpeaking()
+        } else {
+            tracker.speakCurrentQuote()
+        }
     }
 
     /// Renders the current quote and presents the system share picker,
@@ -236,6 +258,9 @@ final class MenuBarController {
             },
             onShare: { [weak self] in
                 self?.shareCurrentQuote()
+            },
+            onSpeak: { [weak self] in
+                self?.speakOrStopCurrentQuote()
             },
             onQuit: { [weak self] in
                 self?.quit()

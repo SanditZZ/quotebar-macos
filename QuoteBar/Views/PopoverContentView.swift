@@ -13,6 +13,7 @@ struct PopoverContentView: View {
     let onOpenHistory: () -> Void
     let onOpenSettings: () -> Void
     let onShare: () -> Void
+    let onSpeak: () -> Void
     let onQuit: () -> Void
 
     var body: some View {
@@ -71,6 +72,12 @@ struct PopoverContentView: View {
             footerButton("History", systemImage: "clock", action: onOpenHistory)
             footerButton("Share", systemImage: "square.and.arrow.up", action: onShare)
                 .disabled(tracker.currentQuote == nil)
+            footerButton(
+                tracker.isSpeaking ? "Stop" : "Read Aloud",
+                systemImage: tracker.isSpeaking ? "stop.fill" : "speaker.wave.2",
+                action: onSpeak
+            )
+            .disabled(tracker.currentQuote == nil)
             footerButton("Settings", systemImage: "gearshape", action: onOpenSettings)
             Spacer()
             footerButton("Quit", systemImage: "power", action: onQuit)
@@ -98,6 +105,7 @@ struct PopoverContentView: View {
         onOpenHistory: {},
         onOpenSettings: {},
         onShare: {},
+        onSpeak: {},
         onQuit: {}
     )
 }

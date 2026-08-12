@@ -7,6 +7,7 @@
 //  correctly with no setup.
 //
 
+import AVFoundation
 import Foundation
 import Observation
 
@@ -28,6 +29,8 @@ final class AppSettings {
         static let shareCardStyle = "shareCardStyle"
         static let notificationsEnabled = "notificationsEnabled"
         static let notificationTime = "notificationTime"
+        static let speechVoiceIdentifier = "speechVoiceIdentifier"
+        static let speechRate = "speechRate"
     }
 
     // MARK: - Data
@@ -86,6 +89,18 @@ final class AppSettings {
         }
     }
 
+    /// The AVSpeechSynthesisVoice identifier "Read Aloud" uses. `nil` means
+    /// the system default voice for the utterance's language.
+    var preferredVoiceIdentifier: String? {
+        didSet { defaults.set(preferredVoiceIdentifier, forKey: Key.speechVoiceIdentifier) }
+    }
+
+    /// Speech rate for "Read Aloud", within
+    /// `AVSpeechUtteranceMinimumSpeechRate...MaximumSpeechRate`.
+    var speechRate: Float {
+        didSet { defaults.set(speechRate, forKey: Key.speechRate) }
+    }
+
     // MARK: - Lifecycle
 
     init(defaults: UserDefaults = .standard) {
@@ -105,6 +120,9 @@ final class AppSettings {
         self.notificationsEnabled = defaults.object(forKey: Key.notificationsEnabled) as? Bool ?? false
         self.notificationTime = defaults.data(forKey: Key.notificationTime)
             .flatMap { try? JSONDecoder().decode(NotificationTime.self, from: $0) } ?? .default
+
+        self.preferredVoiceIdentifier = defaults.string(forKey: Key.speechVoiceIdentifier)
+        self.speechRate = defaults.object(forKey: Key.speechRate) as? Float ?? AVSpeechUtteranceDefaultSpeechRate
     }
 
     // MARK: - Actions
@@ -116,6 +134,8 @@ final class AppSettings {
         shareCardStyle = .midnight
         notificationsEnabled = false
         notificationTime = .default
+        preferredVoiceIdentifier = nil
+        speechRate = AVSpeechUtteranceDefaultSpeechRate
         AppLog.settings.info("[Settings] Restored defaults")
     }
 }
