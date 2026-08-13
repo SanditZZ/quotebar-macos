@@ -10,9 +10,11 @@ Idle Tapper (this project's sibling) ships automatic updates via Sparkle, signed
 
 Sync quote history and favorites across a user's Macs. Non-trivial part: SwiftData's `CloudKit` integration requires schema constraints (every attribute needs a default or be optional, no unique constraints) that `QuoteRecord` does not currently follow, and favorites conflict resolution needs a policy.
 
-## Categories/tags
+## Topic-filtered quote requests
 
-Let users request quotes filtered to a mood or topic ("motivational", "stoic", "funny"). Non-trivial part: the on-device model can take a topic in its prompt reasonably well; the two network APIs have inconsistent (or no) tag support, so a mixed source model has to either fake tags for network-sourced quotes or hide the filter when the AI path isn't active.
+Not to be confused with the user-assigned tags that already shipped. Those label quotes the user has *already seen*, and filter history. This entry is the opposite direction: asking a source for a quote *about* a mood or topic ("motivational", "stoic", "funny") at fetch time, before there is a quote to label.
+
+Let users request quotes filtered to a mood or topic. Non-trivial part: the on-device model can take a topic in its prompt reasonably well; the two network APIs have inconsistent (or no) topic support, so a mixed source model has to either fabricate a topic match for network-sourced quotes or hide the filter when the AI path isn't active.
 
 ## Widget
 
