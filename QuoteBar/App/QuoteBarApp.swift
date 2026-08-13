@@ -24,7 +24,8 @@ struct QuoteBarApp: App {
                 notificationService: AppEnvironment.shared.notificationService,
                 customQuoteLibrary: AppEnvironment.shared.customQuoteLibrary,
                 tagLibrary: AppEnvironment.shared.tagLibrary,
-                backupService: AppEnvironment.shared.backupService
+                backupService: AppEnvironment.shared.backupService,
+                updateService: AppEnvironment.shared.updateService
             )
         }
     }

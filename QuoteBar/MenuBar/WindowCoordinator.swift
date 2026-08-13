@@ -21,6 +21,7 @@ final class WindowCoordinator {
     private let customQuoteLibrary: CustomQuoteLibrary
     private let tagLibrary: QuoteTagLibrary
     private let backupService: QuoteBackupService
+    private let updateService: UpdateService
 
     private var historyWindow: NSWindow?
     private var settingsWindow: NSWindow?
@@ -33,7 +34,8 @@ final class WindowCoordinator {
         notificationService: QuoteNotificationService,
         customQuoteLibrary: CustomQuoteLibrary,
         tagLibrary: QuoteTagLibrary,
-        backupService: QuoteBackupService
+        backupService: QuoteBackupService,
+        updateService: UpdateService
     ) {
         self.tracker = tracker
         self.settings = settings
@@ -43,6 +45,7 @@ final class WindowCoordinator {
         self.customQuoteLibrary = customQuoteLibrary
         self.tagLibrary = tagLibrary
         self.backupService = backupService
+        self.updateService = updateService
     }
 
     // MARK: - Actions
@@ -85,7 +88,8 @@ final class WindowCoordinator {
                 notificationService: notificationService,
                 customQuoteLibrary: customQuoteLibrary,
                 tagLibrary: tagLibrary,
-                backupService: backupService
+                backupService: backupService,
+                updateService: updateService
             )
         )
         settingsWindow = window

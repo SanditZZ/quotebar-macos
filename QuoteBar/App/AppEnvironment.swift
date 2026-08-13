@@ -26,6 +26,10 @@ final class AppEnvironment {
     let tagLibrary: QuoteTagLibrary
     let backupService: QuoteBackupService
 
+    /// Sparkle. Created here so the background schedule starts with the app
+    /// rather than the first time Settings is opened.
+    let updateService = UpdateService.shared
+
     /// True when the on-disk store could not be opened and history is being
     /// held in memory only. Surfaced in the UI rather than failing silently.
     let isEphemeral: Bool

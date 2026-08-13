@@ -21,6 +21,7 @@ struct SettingsView: View {
     var customQuoteLibrary: CustomQuoteLibrary
     var tagLibrary: QuoteTagLibrary
     var backupService: QuoteBackupService
+    var updateService: UpdateService
 
     @State private var selectedTab: SettingsTab = .general
 
@@ -43,7 +44,8 @@ struct SettingsView: View {
                 settings: settings,
                 launchAtLogin: launchAtLogin,
                 hotKeyService: hotKeyService,
-                notificationService: notificationService
+                notificationService: notificationService,
+                updateService: updateService
             )
         case .quotes:
             QuotesSettingsTab(
@@ -83,7 +85,8 @@ struct SettingsView: View {
         backupService: QuoteBackupService(
             quoteRepository: SwiftDataQuoteRepository(container: container),
             customQuoteRepository: SwiftDataCustomQuoteRepository(container: container)
-        )
+        ),
+        updateService: .shared
     )
     .frame(width: 640, height: 520)
 }
