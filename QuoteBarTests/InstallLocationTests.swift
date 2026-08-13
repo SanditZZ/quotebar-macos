@@ -16,6 +16,19 @@ struct InstallLocationTests {
 
     private let home = URL(fileURLWithPath: "/Users/example")
 
+    /// A volume path that is guaranteed not to be mounted.
+    ///
+    /// `classify` resolves symlinks against the real filesystem, so a name that
+    /// happens to match a mounted volume stops testing the logic and starts
+    /// testing the machine. Every drag-to-install DMG contains an
+    /// `Applications` symlink pointing at `/Applications`, so while a QuoteBar
+    /// DMG is mounted — exactly the state a local release rehearsal leaves
+    /// behind — `/Volumes/QuoteBar/Applications/QuoteBar.app` resolves to
+    /// `/Applications/QuoteBar.app` before any check runs, and the disk-image
+    /// case silently reports itself as a normal install. A unique name cannot
+    /// collide with a real mount.
+    private let volume = "/Volumes/QuoteBar-\(UUID().uuidString)"
+
     private func classify(_ path: String) -> InstallLocation {
         InstallLocationCheck.classify(
             bundleURL: URL(fileURLWithPath: path),
@@ -43,7 +56,7 @@ struct InstallLocationTests {
 
     @Test("A mounted disk image is read-only, so it cannot be updated in place")
     func diskImageIsDetected() {
-        #expect(classify("/Volumes/QuoteBar/QuoteBar.app") == .diskImage)
+        #expect(classify("\(volume)/QuoteBar.app") == .diskImage)
     }
 
     @Test("A DMG's own Applications symlink is still a disk image")
@@ -51,7 +64,7 @@ struct InstallLocationTests {
         // Every drag-to-install DMG contains a folder called "Applications".
         // Classifying by that name first would call the read-only volume a
         // normal install and suppress the one warning that matters most.
-        #expect(classify("/Volumes/QuoteBar/Applications/QuoteBar.app") == .diskImage)
+        #expect(classify("\(volume)/Applications/QuoteBar.app") == .diskImage)
     }
 
     @Test("Downloads is the silent-failure case: the update lands there instead")
