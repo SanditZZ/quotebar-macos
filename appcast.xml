@@ -1,0 +1,14 @@
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>QuoteBar</title>
+        <item>
+            <title>0.2.0</title>
+            <pubDate>Thu, 13 Aug 2026 09:17:36 +0000</pubDate>
+            <sparkle:version>2</sparkle:version>
+            <sparkle:shortVersionString>0.2.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://sanditzz.github.io/quotebar-macos/releases/QuoteBar-0.2.0.zip" length="2329042" type="application/octet-stream" sparkle:edSignature="SB0BRLYchD81hExoqtIUOWYqJ2Ia45N+AOpD/Qft5LCTeabe9oRUNCseVbHUuqxHG+lGWH9xlLobtKjdscX3Dg=="/>
+        </item>
+    </channel>
+</rss>
