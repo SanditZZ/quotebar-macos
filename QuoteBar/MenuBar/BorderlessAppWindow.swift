@@ -71,6 +71,14 @@ final class BorderlessAppWindow: NSWindow {
     override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { true }
 
+    /// AppKit's own `performClose:` refuses on a window with no close button,
+    /// beeping instead. The application menu's Close item sends exactly that,
+    /// so without this override adding a Window menu would have given the app
+    /// a Cmd+W that beeps rather than closes.
+    override func performClose(_ sender: Any?) {
+        close()
+    }
+
     override func keyDown(with event: NSEvent) {
         if event.modifierFlags.contains(.command),
            event.charactersIgnoringModifiers?.lowercased() == "w" {
