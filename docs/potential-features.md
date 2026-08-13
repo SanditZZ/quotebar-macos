@@ -2,9 +2,9 @@
 
 A backlog of ideas that are not trivial enough to just build. Each entry notes the constraint that makes it non-trivial. Read this before proposing something new — add to it rather than duplicating it.
 
-## Auto-update (Sparkle)
+## Notarized releases
 
-Idle Tapper (this project's sibling) ships automatic updates via Sparkle, signed with an EdDSA key kept out of the repo. QuoteBar does not have this yet. Non-trivial part: needs a generated appcast, a private key in a GitHub Actions secret, and — because the app is sandboxed here (unlike Idle Tapper) — Sparkle's XPC installer service rather than the simpler unsandboxed install path.
+Auto-update via Sparkle has shipped, but releases are ad-hoc signed and unnotarized, so macOS refuses to open the app until the user clears the quarantine flag by hand. Non-trivial part: needs a paid Apple Developer Program membership and a Developer ID Application certificate, neither of which exists yet. The release workflow already takes the signed and notarized path the moment the secrets are present, so this is a purchase and a key handover rather than a code change. See RELEASING.md.
 
 ## iCloud sync
 

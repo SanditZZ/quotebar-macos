@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SwiftData-backed local history, no accounts, no sync
 - App icon, generated from the same SF Symbol the menu bar uses
 - Accessibility labels on the icon-only controls, so each is announced by name and state instead of as "0", "circle" or "Trash"
+- Automatic updates via Sparkle: QuoteBar checks for a new version once a day in the background, and offers it when one is found
+- An Updates section in Settings, under General, with a switch for the daily check, a Check Now button, and a line saying when the last check happened
+- A "Check for Updates..." item in the menu bar menu, disabled while a check is already running
+- A warning in Settings when QuoteBar is running from a disk image or from somewhere other than Applications, since it updates itself in place and a copy left elsewhere would never pick up new versions
+- A release pipeline that builds, signs, packages a zip and a DMG, publishes the release, regenerates the signed update feed, and refreshes the Homebrew cask when the version changes
+- RELEASING.md, covering how to cut a version and what is still needed before automatic updates reach users
 
 ### Changed
 
@@ -23,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Settings is organized into General, Quotes, Sharing, Data and About tabs down the left, instead of one long scroll of eleven sections that buried Backup and About at the bottom
 - Settings opens larger, at 660x560, to make room for the tab sidebar
 - Switches in Settings now carry a short line of explanatory text under the name
+- The app is no longer sandboxed, because Sparkle installs an update by replacing the application bundle and a sandboxed app cannot do that
+- Quote history now lives in ~/Library/Application Support/QuoteBar/ instead of inside the sandbox container. Existing history, favorites, custom quotes and tags are copied across on the first launch after updating, and the original is left in place untouched
 
 ### Fixed
 
@@ -30,3 +38,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A tag rename that was never submitted with Return left the row stuck in edit mode, hiding the tag's real name, with no way out but committing the unwanted text
 - Popover footer captions wrapped to one or two characters per line, because five labelled buttons cannot fit the popover width
 - The two backup export buttons never opened a save panel, because all three file panels were attached to the same view and SwiftUI keeps only the last one
+- The app would have crashed on launch once Sparkle was added, because the bundle embedded the framework without declaring a runpath to reach it. CI now inspects the built binary, which the test suite cannot do
