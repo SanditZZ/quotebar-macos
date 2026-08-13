@@ -17,17 +17,38 @@ enum ModelContainerFactory {
     /// required for it to be included in the schema.
     static let schema = Schema([QuoteRecord.self, CustomQuoteEntry.self, QuoteTag.self])
 
-    /// Container backed by the on-disk SQLite store.
+    /// Container backed by the on-disk SQLite store in Application Support.
     ///
-    /// No explicit URL is passed: the app is sandboxed, so SwiftData's default
-    /// location already lives inside the app's own container — unlike
-    /// idle-tapper-macos, there's no unsandboxed-store migration to do here.
-    static func makePersistent() throws -> ModelContainer {
-        let configuration = ModelConfiguration(schema: schema)
+    /// The location is named explicitly (see `StoreLocations`) rather than left
+    /// to SwiftData's default, and the store left behind by the sandboxed
+    /// builds is brought across on the first launch that finds one.
+    ///
+    /// - Parameter url: Optional explicit store location, used by tests and by
+    ///   anyone running multiple instances side by side. Supplying one skips
+    ///   the migration, since it is only meaningful for the app's own store.
+    static func makePersistent(at url: URL? = nil) throws -> ModelContainer {
+        let storeURL: URL
+        if let url {
+            storeURL = url
+        } else {
+            StoreMigrator.migrateIfNeeded()
+            storeURL = StoreLocations.storeURL
+        }
+
+        // SwiftData will not create intermediate directories for a store URL it
+        // was handed, and the app owns a subdirectory that may not exist yet.
+        try FileManager.default.createDirectory(
+            at: storeURL.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+
+        let configuration = ModelConfiguration(schema: schema, url: storeURL)
 
         do {
             let container = try ModelContainer(for: schema, configurations: [configuration])
-            AppLog.persistence.info("[Persistence] Opened persistent store")
+            AppLog.persistence.info(
+                "[Persistence] Opened persistent store at \(storeURL.path, privacy: .public)"
+            )
             return container
         } catch {
             AppLog.persistence.error(
