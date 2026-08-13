@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- MOVED: the update controls now have their own Updates tab in Settings, instead of sitting at the bottom of General under Notifications. The switch, the Check Now button and the last-checked line are unchanged, and the "Check for Updates..." item in the menu bar menu still works as before
+
 ## [0.3.0] - 2026-08-13
 
 Window chrome rework, and QuoteBar now appears in the Command-Tab switcher while a window is open.

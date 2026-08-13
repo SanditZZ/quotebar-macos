@@ -2,7 +2,11 @@
 //  GeneralSettingsTab.swift
 //  QuoteBar — Views
 //
-//  Launch behaviour, the global shortcut, the daily notification, and updates.
+//  Launch behaviour, the global shortcut, and the daily notification.
+//
+//  Updates used to be a fourth section here. It now has its own tab, since
+//  updating is not a general preference and being last under Notifications hid
+//  it.
 //
 
 import SwiftUI
@@ -12,14 +16,12 @@ struct GeneralSettingsTab: View {
     var launchAtLogin: LaunchAtLoginService
     var hotKeyService: GlobalHotKeyService
     var notificationService: QuoteNotificationService
-    var updateService: UpdateService
 
     var body: some View {
         SettingsTabScroll {
             generalSection
             shortcutSection
             notificationsSection
-            updatesSection
         }
         .onAppear {
             launchAtLogin.refresh()
@@ -119,59 +121,6 @@ struct GeneralSettingsTab: View {
         Binding(
             get: { NotificationTimeConversion.date(from: settings.notificationTime) },
             set: { settings.notificationTime = NotificationTimeConversion.time(from: $0) }
-        )
-    }
-
-    // MARK: - Updates
-
-    private var updatesSection: some View {
-        SettingsSection("Updates") {
-            SettingToggle(
-                "Check for updates automatically",
-                description: "Looks for a new version once a day in the background.",
-                isOn: automaticUpdatesBinding
-            )
-
-            HStack {
-                Text(UpdateStatusFormatter.lastCheckedDescription(lastCheck: updateService.lastCheckDate))
-                    .font(DesignTokens.Typography.caption)
-                    .foregroundStyle(AppColors.textTertiary)
-
-                Spacer(minLength: DesignTokens.Spacing.medium)
-
-                Button("Check Now") { updateService.checkForUpdates() }
-                    .disabled(!updateService.canCheck)
-            }
-
-            if let message = UpdateStatusFormatter.message(for: updateService.lastOutcome) {
-                Text(message)
-                    .font(DesignTokens.Typography.caption)
-                    .foregroundStyle(
-                        UpdateStatusFormatter.isWarning(updateService.lastOutcome)
-                            ? AppColors.warning
-                            : AppColors.textTertiary
-                    )
-            }
-
-            // Shown whatever the check reported: an app running from a disk
-            // image or Downloads updates the copy sitting there, which looks
-            // like updates silently never arriving.
-            if let message = updateService.installLocationWarning {
-                Text(message)
-                    .font(DesignTokens.Typography.caption)
-                    .foregroundStyle(AppColors.warning)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-    }
-
-    /// Sparkle owns this preference — it persists the value itself and reads it
-    /// on its own schedule — so the binding writes through to the service
-    /// rather than storing a copy in `AppSettings` that could drift out of step.
-    private var automaticUpdatesBinding: Binding<Bool> {
-        Binding(
-            get: { updateService.automaticallyChecks },
-            set: { updateService.automaticallyChecks = $0 }
         )
     }
 }
