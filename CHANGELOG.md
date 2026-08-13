@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-08-13
+
+Window chrome rework, and QuoteBar now appears in the Command-Tab switcher while a window is open.
+
+### Added
+
+- QuoteBar joins the Command-Tab switcher while History or Settings is open, and leaves it again once the last window closes. A Dock icon appears for as long as a window is open, since macOS ties the two together
+- A standard menu bar, so Cut, Copy, Paste and Select All work in every text field
+
+### Changed
+
+- Settings now has a full-height sidebar with the traffic lights inside it, in place of the header strip across the top. History keeps its header, since it has no sidebar
+
+### Fixed
+
+- Borderless windows lost their rounded corners as soon as content was attached, leaving square corners on History and Settings
+- Command-comma opened a second, plain grey Settings window instead of the real one
+- QuoteBar stayed in the Command-Tab switcher with no windows open, but only after both History and Settings had been opened at least once
+
 ## [0.2.0] - 2026-08-13
 
 First public release. QuoteBar can now update itself, which is what makes every later release reachable.
@@ -44,5 +63,6 @@ First public release. QuoteBar can now update itself, which is what makes every 
 - The two backup export buttons never opened a save panel, because all three file panels were attached to the same view and SwiftUI keeps only the last one
 - The app would have crashed on launch once Sparkle was added, because the bundle embedded the framework without declaring a runpath to reach it. CI now inspects the built binary, which the test suite cannot do
 
-[Unreleased]: https://github.com/SanditZZ/quotebar-macos/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/SanditZZ/quotebar-macos/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/SanditZZ/quotebar-macos/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/SanditZZ/quotebar-macos/releases/tag/v0.2.0
