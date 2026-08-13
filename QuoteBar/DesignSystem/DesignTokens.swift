@@ -150,16 +150,58 @@ enum DesignTokens {
         /// Smallest useful History window.
         static let historyWindowMinSize = CGSize(width: 400, height: 320)
 
-        /// Size the Settings window opens at.
-        static let settingsWindowSize = CGSize(width: 440, height: 520)
+        /// Size the Settings window opens at. Wider than the old single-column
+        /// layout because the sidebar now takes `settingsSidebarWidth` before
+        /// the content column starts.
+        static let settingsWindowSize = CGSize(width: 660, height: 560)
 
-        /// Smallest Settings window. The content scrolls below this.
-        static let settingsWindowMinSize = CGSize(width: 440, height: 360)
+        /// Smallest Settings window. The content scrolls below this. Anyone
+        /// carrying a saved frame from the pre-sidebar layout gets clamped up
+        /// to this on restore, since `contentMinSize` is applied before the
+        /// autosave name.
+        static let settingsWindowMinSize = CGSize(width: 560, height: 420)
 
         /// Fixed square canvas for an exported share image — works for every
         /// share destination (Messages, AirDrop, Save Image, posted anywhere)
         /// without letterboxing.
         static let shareImageSize = CGSize(width: 1080, height: 1080)
+
+        /// Corner radius of a borderless window. Applied to the content view's
+        /// layer, since a borderless window has no system frame to round.
+        static let windowCornerRadius: CGFloat = 10
+
+        /// Diameter of one custom traffic light. Matches the system's own.
+        static let trafficLightDiameter: CGFloat = 12
+
+        /// Gap between traffic lights. Matches the system's own.
+        static let trafficLightSpacing: CGFloat = 8
+
+        /// Height of a borderless window's own header strip, which replaces the
+        /// system title bar and carries the traffic lights and the title.
+        static let windowHeaderHeight: CGFloat = 38
+
+        /// Width of the Settings sidebar. Wide enough for the longest tab name
+        /// at `sectionTitle` size without truncating.
+        static let settingsSidebarWidth: CGFloat = 148
+
+        /// Height of one sidebar tab row.
+        static let sidebarRowHeight: CGFloat = 30
+    }
+
+    // MARK: - Vibrancy
+
+    /// Tint strengths layered over the window's vibrancy material. The material
+    /// alone samples whatever is behind the window, so contrast would otherwise
+    /// depend on the user's wallpaper. A tint on top bounds it, and the two
+    /// planes differ so the sidebar reads as recessed from the content.
+    enum Vibrancy {
+        /// Tint over the main content area.
+        static let contentTintDark: CGFloat = 0.35
+        static let contentTintLight: CGFloat = 0.40
+
+        /// Tint over the sidebar — heavier, so it separates from the content.
+        static let sidebarTintDark: CGFloat = 0.55
+        static let sidebarTintLight: CGFloat = 0.50
     }
 
     // MARK: - Animation
