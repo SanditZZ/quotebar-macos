@@ -8,7 +8,10 @@
 //  Everything the system frame normally provides has to be re-supplied:
 //
 //  - Rounded corners come from the content view's layer, since there is no
-//    system frame to round.
+//    system frame to round. Applied whenever the content view changes, not
+//    only in `init`: assigning `contentViewController` *replaces* the content
+//    view, so rounding the one AppKit made during `init` and stopping there
+//    left every window square-cornered in practice.
 //  - Dragging comes from `isMovableByWindowBackground`, since there is no
 //    title bar to grab.
 //  - Key/main status needs the overrides below; a borderless window refuses
@@ -44,6 +47,20 @@ final class BorderlessAppWindow: NSWindow {
         hasShadow = true
         isMovableByWindowBackground = true
 
+        roundContentViewCorners()
+    }
+
+    /// Re-rounds whenever AppKit hands the window a different content view.
+    ///
+    /// `window.contentViewController = …` swaps the content view wholesale, so
+    /// anything configured on the previous one is gone. Hooking the property
+    /// keeps the corners correct however the content is attached, instead of
+    /// depending on every call site to remember.
+    override var contentView: NSView? {
+        didSet { roundContentViewCorners() }
+    }
+
+    private func roundContentViewCorners() {
         contentView?.wantsLayer = true
         contentView?.layer?.cornerRadius = DesignTokens.Layout.windowCornerRadius
         contentView?.layer?.masksToBounds = true
@@ -53,6 +70,14 @@ final class BorderlessAppWindow: NSWindow {
     /// fields from taking focus and stop the window from ever looking active.
     override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { true }
+
+    /// AppKit's own `performClose:` refuses on a window with no close button,
+    /// beeping instead. The application menu's Close item sends exactly that,
+    /// so without this override adding a Window menu would have given the app
+    /// a Cmd+W that beeps rather than closes.
+    override func performClose(_ sender: Any?) {
+        close()
+    }
 
     override func keyDown(with event: NSEvent) {
         if event.modifierFlags.contains(.command),

@@ -93,6 +93,13 @@ final class MenuBarController {
     /// Fired by the global "New Quote" shortcut. Opens the popover if it
     /// wasn't already showing, then always fetches a new quote — the same
     /// outcome as clicking the status item and pressing "New Quote".
+    /// Open Settings from outside the status item menu — the application
+    /// menu's Cmd+comma item routes here, so that shortcut opens the app's own
+    /// borderless window rather than a second, system-chrome one.
+    func openSettingsWindow() {
+        windowCoordinator.showSettings()
+    }
+
     func triggerFromGlobalHotKey() {
         guard let button = statusItem?.button else { return }
 

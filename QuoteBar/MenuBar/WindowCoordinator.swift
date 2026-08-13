@@ -26,6 +26,9 @@ final class WindowCoordinator {
     private var historyWindow: NSWindow?
     private var settingsWindow: NSWindow?
 
+    /// Keeps the close observers alive for as long as the coordinator is.
+    private let observers = ObserverBag()
+
     init(
         tracker: QuoteTracker,
         settings: AppSettings,
@@ -65,6 +68,7 @@ final class WindowCoordinator {
             content: HistoryView(tracker: tracker, settings: settings, tagLibrary: tagLibrary)
         )
         historyWindow = window
+        observeClose(of: window)
         present(window)
 
         AppLog.app.info("[App] Opened history window")
@@ -80,6 +84,9 @@ final class WindowCoordinator {
             title: "QuoteBar Settings",
             size: DesignTokens.Layout.settingsWindowSize,
             minSize: DesignTokens.Layout.settingsWindowMinSize,
+            // Settings places the traffic lights in its own sidebar, so the
+            // sidebar can run the full height of the window.
+            chrome: .none,
             content: SettingsView(
                 tracker: tracker,
                 settings: settings,
@@ -93,6 +100,7 @@ final class WindowCoordinator {
             )
         )
         settingsWindow = window
+        observeClose(of: window)
         present(window)
 
         AppLog.app.info("[App] Opened settings window")
@@ -104,6 +112,7 @@ final class WindowCoordinator {
         title: String,
         size: CGSize,
         minSize: CGSize,
+        chrome: WindowChrome = .header,
         content: some View
     ) -> NSWindow {
         // `BorderlessAppWindow` fixes its own style mask, so the one passed
@@ -128,7 +137,7 @@ final class WindowCoordinator {
         // hosting controller out of driving the size, then applying the
         // intended size afterwards, is what keeps these windows usable.
         let hosting = NSHostingController(
-            rootView: WindowShell(title: title) { content }
+            rootView: WindowShell(title: title, chrome: chrome) { content }
         )
         hosting.sizingOptions = []
         window.contentViewController = hosting
@@ -146,7 +155,49 @@ final class WindowCoordinator {
     }
 
     private func present(_ window: NSWindow) {
+        // Cmd+Tab lists applications, not windows, and an `.accessory` app is
+        // excluded from it entirely — so with the app left as an accessory
+        // there is no way to switch back to History or Settings once they fall
+        // behind something else. Becoming `.regular` while a window is open
+        // puts QuoteBar in the switcher, and Cmd+` then cycles between the two
+        // windows. The cost is a temporary Dock icon: macOS ties the Dock and
+        // the switcher to the same activation policy, so one cannot be had
+        // without the other.
+        NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
+    }
+
+    /// Return to accessory once the last auxiliary window has gone.
+    ///
+    /// Keyed on the *remaining* windows rather than on the one that closed:
+    /// dropping straight back to `.accessory` whenever any window closes would
+    /// take the app out of Cmd+Tab while the other one is still on screen,
+    /// stranding a visible window with no way to switch to it.
+    private func observeClose(of window: NSWindow) {
+        observers.observe(NSWindow.willCloseNotification, object: window) { [weak self] _ in
+            // Deliberately deferred rather than handled inline. `willClose`
+            // means "about to", so the window is still open and still counts
+            // as visible; deciding now would always see one window too many.
+            // Hopping to the next runloop pass lets the close finish first.
+            Task { @MainActor in self?.restoreAccessoryPolicyIfIdle() }
+        }
+    }
+
+    /// Drop back to accessory once no auxiliary window is left on screen.
+    private func restoreAccessoryPolicyIfIdle() {
+        // Asks AppKit rather than consulting `historyWindow`/`settingsWindow`.
+        // Those references are kept after a close so the window can be reused,
+        // which makes them useless for answering "is anything still open?" —
+        // reading them was why the app stayed in Cmd+Tab with no windows left
+        // once both windows had been opened at least once.
+        let stillOpen = NSApp.windows.contains { window in
+            window is BorderlessAppWindow && window.isVisible
+        }
+
+        guard !stillOpen else { return }
+
+        NSApp.setActivationPolicy(.accessory)
+        AppLog.app.info("[App] Last window closed — back to accessory")
     }
 }

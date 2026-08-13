@@ -6,7 +6,14 @@
 //  scrolling column of eleven sections, which buried Backup and About at the
 //  bottom where nobody found them.
 //
+//  The sidebar also carries the window's traffic lights. That looks like a
+//  layering mistake and is not: a full-width header strip above the content
+//  would push the sidebar down, leaving a band across the top of the window
+//  with the sidebar boxed in beneath it. Putting the controls inside the
+//  sidebar is what lets it run the full height of the window.
+//
 
+import AppKit
 import SwiftUI
 
 /// The Settings tabs, in sidebar order.
@@ -43,8 +50,12 @@ enum SettingsTab: String, CaseIterable, Identifiable {
 struct SettingsSidebar: View {
     @Binding var selection: SettingsTab
 
+    @State private var window: NSWindow?
+
     var body: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.extraSmall) {
+            windowControls
+
             ForEach(SettingsTab.allCases) { tab in
                 SettingsSidebarRow(
                     tab: tab,
@@ -58,8 +69,42 @@ struct SettingsSidebar: View {
         .frame(width: DesignTokens.Layout.settingsSidebarWidth)
         .frame(maxHeight: .infinity)
         .vibrantBackground(.sidebar)
+        .background(SettingsWindowAccessor { window = $0 })
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Settings categories")
+    }
+
+    /// Close and minimise, sitting where the system's own controls would.
+    private var windowControls: some View {
+        HStack(spacing: DesignTokens.Layout.trafficLightSpacing) {
+            TrafficLightButton(kind: .close, window: window)
+            TrafficLightButton(kind: .miniaturize, window: window)
+            Spacer(minLength: 0)
+        }
+        .padding(.leading, DesignTokens.Spacing.extraSmall)
+        .frame(height: DesignTokens.Layout.windowHeaderHeight)
+    }
+}
+
+/// Reports the `NSWindow` hosting the sidebar.
+///
+/// The traffic lights have to act on the window that contains them rather than
+/// on `NSApp.keyWindow`: macOS lets you click a background window's close
+/// button directly, so keying off the focused window would close the wrong one
+/// whenever History and Settings are both open.
+private struct SettingsWindowAccessor: NSViewRepresentable {
+    let onResolve: (NSWindow?) -> Void
+
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        // `view.window` is nil until the view is in a window, so the lookup is
+        // deferred rather than read during `makeNSView`.
+        DispatchQueue.main.async { onResolve(view.window) }
+        return view
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {
+        DispatchQueue.main.async { onResolve(nsView.window) }
     }
 }
 
