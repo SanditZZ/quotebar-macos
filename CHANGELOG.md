@@ -25,3 +25,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - History and Settings opened collapsed to roughly a title bar (128x122 and 440x28), below their own stated minimum size
 - A tag rename that was never submitted with Return left the row stuck in edit mode, hiding the tag's real name, with no way out but committing the unwanted text
 - Popover footer captions wrapped to one or two characters per line, because five labelled buttons cannot fit the popover width
+- The two backup export buttons never opened a save panel, because all three file panels were attached to the same view and SwiftUI keeps only the last one
