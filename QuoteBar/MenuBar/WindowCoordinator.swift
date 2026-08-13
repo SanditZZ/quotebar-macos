@@ -175,22 +175,29 @@ final class WindowCoordinator {
     /// take the app out of Cmd+Tab while the other one is still on screen,
     /// stranding a visible window with no way to switch to it.
     private func observeClose(of window: NSWindow) {
-        observers.observe(NSWindow.willCloseNotification, object: window) { [weak self] notification in
-            guard let closed = notification.object as? NSWindow else { return }
-            Task { @MainActor in self?.restoreAccessoryPolicy(after: closed) }
+        observers.observe(NSWindow.willCloseNotification, object: window) { [weak self] _ in
+            // Deliberately deferred rather than handled inline. `willClose`
+            // means "about to", so the window is still open and still counts
+            // as visible; deciding now would always see one window too many.
+            // Hopping to the next runloop pass lets the close finish first.
+            Task { @MainActor in self?.restoreAccessoryPolicyIfIdle() }
         }
     }
 
-    private func restoreAccessoryPolicy(after closed: NSWindow) {
-        // The closing window still reports `isVisible == true` at willClose
-        // time, so it is excluded by identity rather than by visibility.
-        let remaining = [historyWindow, settingsWindow]
-            .compactMap { $0 }
-            .filter { $0 !== closed && $0.isVisible }
+    /// Drop back to accessory once no auxiliary window is left on screen.
+    private func restoreAccessoryPolicyIfIdle() {
+        // Asks AppKit rather than consulting `historyWindow`/`settingsWindow`.
+        // Those references are kept after a close so the window can be reused,
+        // which makes them useless for answering "is anything still open?" —
+        // reading them was why the app stayed in Cmd+Tab with no windows left
+        // once both windows had been opened at least once.
+        let stillOpen = NSApp.windows.contains { window in
+            window is BorderlessAppWindow && window.isVisible
+        }
 
-        guard remaining.isEmpty else { return }
+        guard !stillOpen else { return }
 
         NSApp.setActivationPolicy(.accessory)
-        AppLog.app.debug("[App] Last window closed — back to accessory")
+        AppLog.app.info("[App] Last window closed — back to accessory")
     }
 }
