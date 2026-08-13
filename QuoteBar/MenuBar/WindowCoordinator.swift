@@ -26,6 +26,9 @@ final class WindowCoordinator {
     private var historyWindow: NSWindow?
     private var settingsWindow: NSWindow?
 
+    /// Keeps the close observers alive for as long as the coordinator is.
+    private let observers = ObserverBag()
+
     init(
         tracker: QuoteTracker,
         settings: AppSettings,
@@ -65,6 +68,7 @@ final class WindowCoordinator {
             content: HistoryView(tracker: tracker, settings: settings, tagLibrary: tagLibrary)
         )
         historyWindow = window
+        observeClose(of: window)
         present(window)
 
         AppLog.app.info("[App] Opened history window")
@@ -96,6 +100,7 @@ final class WindowCoordinator {
             )
         )
         settingsWindow = window
+        observeClose(of: window)
         present(window)
 
         AppLog.app.info("[App] Opened settings window")
@@ -150,7 +155,42 @@ final class WindowCoordinator {
     }
 
     private func present(_ window: NSWindow) {
+        // Cmd+Tab lists applications, not windows, and an `.accessory` app is
+        // excluded from it entirely — so with the app left as an accessory
+        // there is no way to switch back to History or Settings once they fall
+        // behind something else. Becoming `.regular` while a window is open
+        // puts QuoteBar in the switcher, and Cmd+` then cycles between the two
+        // windows. The cost is a temporary Dock icon: macOS ties the Dock and
+        // the switcher to the same activation policy, so one cannot be had
+        // without the other.
+        NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
+    }
+
+    /// Return to accessory once the last auxiliary window has gone.
+    ///
+    /// Keyed on the *remaining* windows rather than on the one that closed:
+    /// dropping straight back to `.accessory` whenever any window closes would
+    /// take the app out of Cmd+Tab while the other one is still on screen,
+    /// stranding a visible window with no way to switch to it.
+    private func observeClose(of window: NSWindow) {
+        observers.observe(NSWindow.willCloseNotification, object: window) { [weak self] notification in
+            guard let closed = notification.object as? NSWindow else { return }
+            Task { @MainActor in self?.restoreAccessoryPolicy(after: closed) }
+        }
+    }
+
+    private func restoreAccessoryPolicy(after closed: NSWindow) {
+        // The closing window still reports `isVisible == true` at willClose
+        // time, so it is excluded by identity rather than by visibility.
+        let remaining = [historyWindow, settingsWindow]
+            .compactMap { $0 }
+            .filter { $0 !== closed && $0.isVisible }
+
+        guard remaining.isEmpty else { return }
+
+        NSApp.setActivationPolicy(.accessory)
+        AppLog.app.debug("[App] Last window closed — back to accessory")
     }
 }
