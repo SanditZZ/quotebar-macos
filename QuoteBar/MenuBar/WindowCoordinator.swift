@@ -102,9 +102,13 @@ final class WindowCoordinator {
         minSize: CGSize,
         content: some View
     ) -> NSWindow {
-        let window = NSWindow(
+        // `BorderlessAppWindow` fixes its own style mask, so the one passed
+        // here is ignored — the window has no system title bar. The title is
+        // still set, because the frame autosave name is derived from it and the
+        // window still reports it to accessibility and the window list.
+        let window = BorderlessAppWindow(
             contentRect: NSRect(origin: .zero, size: size),
-            styleMask: [.titled, .closable, .miniaturizable, .resizable],
+            styleMask: .borderless,
             backing: .buffered,
             defer: false
         )
@@ -119,7 +123,9 @@ final class WindowCoordinator {
         // History 128×122, both below their own `contentMinSize`. Opting the
         // hosting controller out of driving the size, then applying the
         // intended size afterwards, is what keeps these windows usable.
-        let hosting = NSHostingController(rootView: content)
+        let hosting = NSHostingController(
+            rootView: WindowShell(title: title) { content }
+        )
         hosting.sizingOptions = []
         window.contentViewController = hosting
 

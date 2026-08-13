@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Popover footer actions are now icon-only, with the name kept as a tooltip and an accessibility label
+- History and Settings are now translucent windows with their own header and traffic lights, in place of the standard opaque grey title bar
+- Settings is organized into General, Quotes, Sharing, Data and About tabs down the left, instead of one long scroll of eleven sections that buried Backup and About at the bottom
+- Settings opens larger, at 660x560, to make room for the tab sidebar
+- Switches in Settings now carry a short line of explanatory text under the name
 
 ### Fixed
 

@@ -37,8 +37,13 @@ struct HistoryView: View {
             } else {
                 List(visibleQuotes) { quote in
                     row(for: quote)
+                        .listRowBackground(Color.clear)
                 }
                 .listStyle(.inset)
+                // The window is vibrant now, and a List paints its own opaque
+                // backing over it, which would leave a flat grey slab in an
+                // otherwise translucent window.
+                .scrollContentBackground(.hidden)
             }
         }
         .padding(DesignTokens.Spacing.popoverPadding)
