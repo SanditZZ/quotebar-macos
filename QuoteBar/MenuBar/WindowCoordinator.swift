@@ -109,10 +109,27 @@ final class WindowCoordinator {
             defer: false
         )
         window.title = title
-        window.contentViewController = NSHostingController(rootView: content)
         window.isReleasedWhenClosed = false
-        window.center()
+
+        // Assigning `contentViewController` makes AppKit resize the window to
+        // the hosting controller's fitting size, discarding the `contentRect`
+        // above. A SwiftUI root of `ScrollView` (Settings) or a `VStack`
+        // wrapping a `List` (History) has no useful ideal height, so that
+        // fitting size collapses to roughly nothing — Settings opened 440×28,
+        // History 128×122, both below their own `contentMinSize`. Opting the
+        // hosting controller out of driving the size, then applying the
+        // intended size afterwards, is what keeps these windows usable.
+        let hosting = NSHostingController(rootView: content)
+        hosting.sizingOptions = []
+        window.contentViewController = hosting
+
+        // `contentMinSize` has to be set before the autosave name, because
+        // that is what restores a saved frame — and AppKit clamps the restored
+        // frame to the minimum on the way in. That is what rescues anyone who
+        // ran a build from before this fix and has a collapsed frame saved.
         window.contentMinSize = minSize
+        window.setContentSize(size)
+        window.center()
         window.setFrameAutosaveName("QuoteBar.\(title).1")
 
         return window
