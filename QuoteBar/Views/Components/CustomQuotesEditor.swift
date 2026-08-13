@@ -141,6 +141,10 @@ struct CustomQuotesEditor: View {
                         .frame(width: DesignTokens.Spacing.iconFrame)
                 }
                 .buttonStyle(.plain)
+                // Announced only as "circle"/"Selected" otherwise, which says
+                // neither which quote it is nor whether it is selected.
+                .accessibilityLabel("Select: \(entry.text)")
+                .accessibilityValue(selectedIDs.contains(entry.id) ? "Selected" : "Not selected")
             }
 
             VStack(alignment: .leading, spacing: 2) {
@@ -161,6 +165,9 @@ struct CustomQuotesEditor: View {
                         .foregroundStyle(AppColors.textTertiary)
                 }
                 .buttonStyle(.plain)
+                // Every row's delete button announced identically as "Trash",
+                // giving no way to tell which quote it removes.
+                .accessibilityLabel("Delete: \(entry.text)")
             }
         }
         .padding(.vertical, DesignTokens.Spacing.extraSmall)

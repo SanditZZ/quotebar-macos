@@ -143,6 +143,10 @@ struct HistoryView: View {
                     .foregroundStyle(quote.isFavorite ? AppColors.warning : AppColors.textTertiary)
             }
             .buttonStyle(.plain)
+            // One row per quote, so the label has to name the quote or every
+            // star in the list announces identically.
+            .accessibilityLabel("Favorite: \(quote.text)")
+            .accessibilityValue(quote.isFavorite ? "On" : "Off")
         }
         .padding(.vertical, DesignTokens.Spacing.extraSmall)
     }

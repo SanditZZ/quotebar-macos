@@ -136,6 +136,14 @@ enum DesignTokens {
         /// popover into a jarringly different size than long ones.
         static let quoteCardMinHeight: CGFloat = 120
 
+        /// Hit target for one of the popover's footer actions. They are
+        /// icon-only — five labelled buttons cannot fit `popoverWidth`, and
+        /// letting them try wrapped every caption down to one or two
+        /// characters per line — so the frame, not the glyph, has to provide a
+        /// comfortable click area. Each button carries a tooltip and an
+        /// accessibility label in place of the visible caption.
+        static let footerButtonSize = CGSize(width: 30, height: 24)
+
         /// Size the History window opens at.
         static let historyWindowSize = CGSize(width: 480, height: 480)
 

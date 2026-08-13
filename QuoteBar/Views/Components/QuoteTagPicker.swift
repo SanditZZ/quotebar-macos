@@ -26,6 +26,8 @@ struct QuoteTagPicker: View {
                 .foregroundStyle(quote.tags.isEmpty ? AppColors.textTertiary : AppColors.accent)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("Tags for: \(quote.text)")
+        .accessibilityValue(quote.tags.isEmpty ? "None" : quote.tags.map(\.name).joined(separator: ", "))
         .popover(isPresented: $isPresented) {
             VStack(alignment: .leading, spacing: DesignTokens.Spacing.extraSmall) {
                 if tagLibrary.tags.isEmpty {

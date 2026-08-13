@@ -86,6 +86,10 @@ struct SettingsView: View {
         section(title: "Notifications") {
             Toggle("Quote of the Day", isOn: notificationsEnabledBinding)
                 .toggleStyle(.switch)
+                // A `.switch` Toggle renders its title as a separate label
+                // that is not associated with the control, so VoiceOver
+                // announced this as a bare "0"/"1" with no name at all.
+                .accessibilityLabel("Quote of the Day")
 
             DatePicker("Time", selection: notificationTimeBinding, displayedComponents: .hourAndMinute)
                 .disabled(!settings.notificationsEnabled)
@@ -133,6 +137,7 @@ struct SettingsView: View {
                 set: { launchAtLogin.setEnabled($0) }
             ))
             .toggleStyle(.switch)
+            .accessibilityLabel("Launch at login")
 
             if let message = launchAtLogin.lastErrorMessage {
                 Text(message)

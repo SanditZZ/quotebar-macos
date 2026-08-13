@@ -26,17 +26,48 @@ struct BackupExportImportView: View {
                 .font(DesignTokens.Typography.caption)
                 .foregroundStyle(AppColors.textTertiary)
 
+            // Each file panel is attached to the button that triggers it, not
+            // to the enclosing VStack. Chaining several presentation modifiers
+            // onto one view makes SwiftUI keep only the last one, so the two
+            // exporters silently never presented.
             HStack {
                 Button("Export JSON Backup…") {
                     jsonExportDocument = RawDataDocument(data: backupService.makeJSONExportData())
                     showingJSONExporter = true
                 }
+                .fileExporter(
+                    isPresented: $showingJSONExporter,
+                    document: jsonExportDocument,
+                    contentType: .json,
+                    defaultFilename: "QuoteBar Backup"
+                ) { result in
+                    backupService.handleExportResult(result, formatName: "JSON")
+                }
+
                 Button("Export Quotes as CSV…") {
                     csvExportDocument = RawDataDocument(data: backupService.makeCSVExportData())
                     showingCSVExporter = true
                 }
+                .fileExporter(
+                    isPresented: $showingCSVExporter,
+                    document: csvExportDocument,
+                    contentType: .commaSeparatedText,
+                    defaultFilename: "QuoteBar Quotes"
+                ) { result in
+                    backupService.handleExportResult(result, formatName: "CSV")
+                }
+
                 Spacer()
+
                 Button("Import Backup…") { showingImporter = true }
+                    .fileImporter(
+                        isPresented: $showingImporter,
+                        allowedContentTypes: [.json]
+                    ) { result in
+                        if case .success(let url) = result {
+                            backupService.importBackup(at: url)
+                        }
+                    }
             }
 
             if let summary = backupService.lastOperationSummary {
@@ -49,30 +80,6 @@ struct BackupExportImportView: View {
                 Text(errorMessage)
                     .font(DesignTokens.Typography.caption)
                     .foregroundStyle(AppColors.warning)
-            }
-        }
-        .fileExporter(
-            isPresented: $showingJSONExporter,
-            document: jsonExportDocument,
-            contentType: .json,
-            defaultFilename: "QuoteBar Backup"
-        ) { result in
-            backupService.handleExportResult(result, formatName: "JSON")
-        }
-        .fileExporter(
-            isPresented: $showingCSVExporter,
-            document: csvExportDocument,
-            contentType: .commaSeparatedText,
-            defaultFilename: "QuoteBar Quotes"
-        ) { result in
-            backupService.handleExportResult(result, formatName: "CSV")
-        }
-        .fileImporter(
-            isPresented: $showingImporter,
-            allowedContentTypes: [.json]
-        ) { result in
-            if case .success(let url) = result {
-                backupService.importBackup(at: url)
             }
         }
     }
