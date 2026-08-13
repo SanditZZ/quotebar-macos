@@ -30,8 +30,34 @@ Every quote is tagged with which of the four produced it, so the source badge on
 - **On-device AI, when available** — original quotes generated locally by Apple's Foundation Models framework; nothing leaves your Mac for this path
 - **Never empty-handed** — a four-tier fallback chain means a tap on **New Quote** always produces something, online or off
 - **History that persists** — every quote you've seen is kept, with favorites and per-source counts
-- **Local and private** — a sandboxed, SwiftData-backed app; the only network requests are the two quote API calls above, and only when the on-device model isn't available
+- **Local and private** — a SwiftData-backed app that keeps everything on your Mac; the only network requests are the two quote API calls above, and only when the on-device model isn't available, plus the update check
+- **Updates itself** — checks once a day in the background via [Sparkle](https://sparkle-project.org) and offers a new version when there is one
 - **Launch at login** — switchable in Settings, via the system login items API
+
+---
+
+## Install
+
+Download the latest `QuoteBar-x.y.z.dmg` from **[Releases](https://github.com/SanditZZ/quotebar-macos/releases)**, open it, and drag **QuoteBar** to your Applications folder.
+
+> [!IMPORTANT]
+> Builds are **not notarized by Apple** yet, so macOS refuses to open the app the first time. After moving it to Applications, run this once:
+>
+> ```bash
+> xattr -dr com.apple.quarantine /Applications/QuoteBar.app
+> ```
+>
+> Or open it once, then go to **System Settings → Privacy & Security** and click **Open Anyway**. On macOS 15 and later, Control-clicking the app no longer works as a bypass.
+
+This is a one-time cost. QuoteBar installs its own updates after that, so the prompt does not come back on every new version.
+
+**Run it from Applications**, not from the disk image or your Downloads folder. QuoteBar updates itself in place, so a copy left elsewhere quietly never picks up new versions. The app says so in Settings if it notices.
+
+### Updating
+
+QuoteBar checks for a new version once a day and offers it when one appears. To check immediately, use **Settings → General → Updates → Check Now**, or **Check for Updates…** in the menu bar menu. The daily check can be switched off in the same place.
+
+Updates are verified against an EdDSA public key built into the app, so a tampered or unsigned update is refused regardless of where it came from.
 
 ---
 
@@ -44,7 +70,7 @@ Every quote is tagged with which of the four produced it, so the source badge on
 | Xcode | 26.0 or later to **build** (the `FoundationModels` framework is only in that SDK) |
 | Swift | 5.0 language mode |
 
-No third-party dependencies.
+One third-party dependency: **[Sparkle](https://github.com/sparkle-project/Sparkle)**, for automatic updates, resolved through Swift Package Manager.
 
 ---
 
@@ -130,16 +156,29 @@ Views and services talk to a protocol, never to `ModelContext`. That gives three
 
 ## Where your data lives
 
-The app is sandboxed, so SwiftData writes inside its container:
-
 ```
-~/Library/Containers/com.kkpon3.QuoteBar/Data/Library/Application Support/QuoteBar/
+~/Library/Application Support/QuoteBar/
     QuoteBar.store        ← the SQLite database
     QuoteBar.store-wal    ← write-ahead log
     QuoteBar.store-shm    ← shared memory
 ```
 
+All three files are the database. The `-wal` in particular routinely holds recent quotes that have not been folded into the main file yet, so copying only `QuoteBar.store` loses data.
+
 Preferences live in `UserDefaults`, not in the database.
+
+### If you used a build from before automatic updates
+
+Earlier versions were sandboxed and kept the database inside the app container. Sparkle installs an update by replacing the application bundle, which a sandboxed app cannot do, so the sandbox had to go — and that changes where SwiftData writes.
+
+The first launch after updating copies the old store to the new location automatically, so history, favorites, custom quotes and tags come across on their own. It **copies rather than moves**, leaving the original untouched as a backup, and it never overwrites a database already at the destination.
+
+If anything looks missing, the original is still at:
+
+```
+~/Library/Containers/com.kkpon3.QuoteBar/Data/Library/Application Support/
+    default.store, default.store-wal, default.store-shm
+```
 
 ---
 
