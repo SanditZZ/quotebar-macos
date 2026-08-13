@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-13
+
+First public release. QuoteBar can now update itself, which is what makes every later release reachable.
+
 ### Added
 
 - Initial scaffold: menu bar popover with a quote card and a "New Quote" button
@@ -39,3 +43,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Popover footer captions wrapped to one or two characters per line, because five labelled buttons cannot fit the popover width
 - The two backup export buttons never opened a save panel, because all three file panels were attached to the same view and SwiftUI keeps only the last one
 - The app would have crashed on launch once Sparkle was added, because the bundle embedded the framework without declaring a runpath to reach it. CI now inspects the built binary, which the test suite cannot do
+
+[Unreleased]: https://github.com/SanditZZ/quotebar-macos/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/SanditZZ/quotebar-macos/releases/tag/v0.2.0
