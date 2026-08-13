@@ -80,6 +80,9 @@ final class WindowCoordinator {
             title: "QuoteBar Settings",
             size: DesignTokens.Layout.settingsWindowSize,
             minSize: DesignTokens.Layout.settingsWindowMinSize,
+            // Settings places the traffic lights in its own sidebar, so the
+            // sidebar can run the full height of the window.
+            chrome: .none,
             content: SettingsView(
                 tracker: tracker,
                 settings: settings,
@@ -104,6 +107,7 @@ final class WindowCoordinator {
         title: String,
         size: CGSize,
         minSize: CGSize,
+        chrome: WindowChrome = .header,
         content: some View
     ) -> NSWindow {
         // `BorderlessAppWindow` fixes its own style mask, so the one passed
@@ -128,7 +132,7 @@ final class WindowCoordinator {
         // hosting controller out of driving the size, then applying the
         // intended size afterwards, is what keeps these windows usable.
         let hosting = NSHostingController(
-            rootView: WindowShell(title: title) { content }
+            rootView: WindowShell(title: title, chrome: chrome) { content }
         )
         hosting.sizingOptions = []
         window.contentViewController = hosting

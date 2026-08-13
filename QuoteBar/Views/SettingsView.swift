@@ -29,8 +29,9 @@ struct SettingsView: View {
         HStack(spacing: 0) {
             SettingsSidebar(selection: $selectedTab)
 
-            Divider()
-
+            // No divider: the sidebar's darker vibrancy already separates the
+            // two columns, and a line drawn on top of that edge reads as a
+            // seam rather than a boundary.
             selectedContent
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
