@@ -12,9 +12,10 @@
 # must the other, or "it passed locally" stops meaning anything.
 #
 # Usage:
-#   scripts/ci-local.sh            # build + test
-#   scripts/ci-local.sh build      # build only
-#   scripts/ci-local.sh test       # test only
+#   scripts/ci-local.sh             # build + frameworks + test
+#   scripts/ci-local.sh build       # build only
+#   scripts/ci-local.sh frameworks  # check embedded frameworks only
+#   scripts/ci-local.sh test        # test only
 #
 # Exit code is 0 only when every stage passed.
 
@@ -75,14 +76,35 @@ run_test() {
     pass "Tests passed"
 }
 
+# Embedded frameworks are invisible to the test suite: it runs in a test host
+# that resolves them differently, so a bundle that dies on launch still tests
+# green. This inspects the built binary instead. See the script's header for
+# the bug that made it necessary.
+run_frameworks() {
+    info "Checking embedded frameworks"
+
+    local app
+    app="$(xcodebuild -project "${PROJECT}" -scheme "${SCHEME}" \
+        -configuration "${CONFIGURATION}" -showBuildSettings 2>/dev/null \
+        | awk -F' = ' '/ BUILT_PRODUCTS_DIR =/ {print $2; exit}' | tr -d '[:space:]')/QuoteBar.app"
+
+    if [ ! -d "${app}" ]; then
+        fail "No built app at ${app} — run the build stage first"
+        return 1
+    fi
+
+    scripts/check-embedded-frameworks.sh "${app}"
+}
+
 trap 'fail "CI checks FAILED — do not push"' ERR
 
 case "${STAGE}" in
-    build) run_build ;;
-    test)  run_test ;;
-    all)   run_build; run_test ;;
+    build)      run_build ;;
+    test)       run_test ;;
+    frameworks) run_frameworks ;;
+    all)        run_build; run_frameworks; run_test ;;
     *)
-        fail "Unknown stage '${STAGE}' (expected: build, test, all)"
+        fail "Unknown stage '${STAGE}' (expected: build, frameworks, test, all)"
         exit 2
         ;;
 esac
