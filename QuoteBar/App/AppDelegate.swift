@@ -31,7 +31,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             notificationService: environment.notificationService,
             customQuoteLibrary: environment.customQuoteLibrary,
             tagLibrary: environment.tagLibrary,
-            backupService: environment.backupService
+            backupService: environment.backupService,
+            updateService: environment.updateService
         )
         menuBarController?.install()
 

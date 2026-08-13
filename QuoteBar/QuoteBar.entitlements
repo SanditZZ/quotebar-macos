@@ -2,24 +2,37 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- The app is sandboxed. Unlike its sibling idle-tapper-macos, QuoteBar has
-	     no auto-updater that needs to replace its own bundle in /Applications,
-	     so there is no reason to turn the sandbox off. -->
-	<key>com.apple.security.app-sandbox</key>
-	<true/>
+	<!--
+	  The app sandbox is deliberately OFF.
 
-	<!-- Fetching a quote from ZenQuotes or DummyJSON when the on-device model is
-	     unavailable. See SECURITY.md for exactly what these requests carry. -->
+	  Sparkle installs an update by replacing the application bundle in
+	  /Applications, which a sandboxed app cannot do. Sparkle can be made to
+	  work inside the sandbox via XPC installer services, but that is a
+	  considerably more fragile arrangement, and it needs consistent Developer
+	  ID signing to work at all — which this project does not have yet.
+
+	  Unlike its sibling idle-tapper-macos, QuoteBar does read files the user
+	  picks: JSON and CSV quote imports, and JSON/CSV backup restores. Losing
+	  the sandbox means losing one layer of containment around that parsing, so
+	  the import path stays the one place in this app to be careful about
+	  malformed input. It decodes into plain value types and never evaluates
+	  anything it reads. See SECURITY.md.
+
+	  The other cost is that the database moved out of the container. See
+	  StoreMigration / StoreMigrator, which carry the old one across on the
+	  first unsandboxed launch and leave the original in place as a backup.
+	-->
+	<key>com.apple.security.app-sandbox</key>
+	<false/>
+
+	<!-- Fetching a quote from ZenQuotes or DummyJSON when the on-device model
+	     is unavailable, and fetching the Sparkle appcast and update archive.
+	     See SECURITY.md for exactly what these requests carry. -->
 	<key>com.apple.security.network.client</key>
 	<true/>
 
-	<!-- Reading a JSON/CSV file the user picks via Settings' "Your Quotes"
-	     import (.fileImporter), and writing an exported JSON/CSV backup file
-	     via Settings' "Backup" export (.fileExporter). A sandboxed app needs
-	     this to read or write any user-selected file at all — read-write is
-	     a superset of read-only for this entitlement family, so this single
-	     key covers both flows rather than declaring both. -->
-	<key>com.apple.security.files.user-selected.read-write</key>
+	<!-- Sparkle ships its own frameworks inside the bundle. -->
+	<key>com.apple.security.cs.disable-library-validation</key>
 	<true/>
 </dict>
 </plist>

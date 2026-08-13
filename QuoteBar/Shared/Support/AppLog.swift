@@ -35,4 +35,7 @@ enum AppLog {
 
     /// The daily "Quote of the Day" notification: authorization, scheduling, taps.
     static let notifications = Logger(subsystem: subsystem, category: "Notifications")
+
+    /// Sparkle: scheduled and manual update checks, downloads, installs.
+    static let updates = Logger(subsystem: subsystem, category: "Updates")
 }
