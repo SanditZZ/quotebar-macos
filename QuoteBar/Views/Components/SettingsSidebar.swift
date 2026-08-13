@@ -22,6 +22,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
     case quotes
     case sharing
     case data
+    case updates
     case about
 
     var id: String { rawValue }
@@ -32,6 +33,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         case .quotes: return "Quotes"
         case .sharing: return "Sharing"
         case .data: return "Data"
+        case .updates: return "Updates"
         case .about: return "About"
         }
     }
@@ -42,6 +44,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         case .quotes: return "quote.bubble"
         case .sharing: return "square.and.arrow.up"
         case .data: return "externaldrive"
+        case .updates: return "arrow.triangle.2.circlepath"
         case .about: return "info.circle"
         }
     }

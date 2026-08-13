@@ -45,8 +45,7 @@ struct SettingsView: View {
                 settings: settings,
                 launchAtLogin: launchAtLogin,
                 hotKeyService: hotKeyService,
-                notificationService: notificationService,
-                updateService: updateService
+                notificationService: notificationService
             )
         case .quotes:
             QuotesSettingsTab(
@@ -62,6 +61,8 @@ struct SettingsView: View {
                 settings: settings,
                 backupService: backupService
             )
+        case .updates:
+            UpdatesSettingsTab(updateService: updateService)
         case .about:
             AboutSettingsTab()
         }
