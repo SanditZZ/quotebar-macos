@@ -88,9 +88,30 @@ The workflow switches mode when both `DEVELOPER_CERTIFICATE_BASE64` and `APPLE_I
 ### 3. The Homebrew cask — OPTIONAL
 
 `update-homebrew-tap.yml` keeps `SanditZZ/homebrew-tap` current, but only updates a cask that
-already exists. Create `Casks/quotebar.rb` in the tap once by hand, then set a `HOMEBREW_TAP_TOKEN`
-secret (a PAT with `contents:write` on the tap). Without both, that job fails and the release is
-otherwise unaffected.
+already exists. Create `Casks/quotebar.rb` in the tap once by hand, then set a
+`HOMEBREW_TAP_DEPLOY_KEY` secret. Without both, that job fails and the release is otherwise
+unaffected.
+
+The secret is the **private half of an SSH deploy key** registered on the tap with write access,
+not a personal access token. A PAT with `contents:write` can write to every repository the account
+owns, so leaking one from CI costs the whole account; a deploy key can write to the tap and nothing
+else, and it does not expire.
+
+To create or rotate one:
+
+```bash
+ssh-keygen -t ed25519 -N "" -C "quotebar-macos release workflow -> SanditZZ/homebrew-tap" -f tap-deploy-key
+gh api repos/SanditZZ/homebrew-tap/keys -f title="quotebar-macos release workflow" \
+  -f key="$(cat tap-deploy-key.pub)" -F read_only=false
+gh secret set HOMEBREW_TAP_DEPLOY_KEY --repo SanditZZ/quotebar-macos < tap-deploy-key
+```
+
+Keep the private key out of the repository, and revoke an old key from the tap's Deploy keys
+settings after rotating. To re-sync the cask without cutting a release, run the workflow manually:
+
+```bash
+gh workflow run update-homebrew-tap.yml --repo SanditZZ/quotebar-macos -f release_tag=v0.4.0
+```
 
 Note this only keeps a *fresh* `brew install` current. Sparkle is what updates installs that
 already exist; the two are independent.

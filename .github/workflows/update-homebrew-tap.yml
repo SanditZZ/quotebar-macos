@@ -12,9 +12,16 @@ name: Update Homebrew Tap
 #
 # Requires two things that are NOT set up automatically:
 #
-#   1. The HOMEBREW_TAP_TOKEN secret: a personal access token for the SanditZZ
-#      account with contents:write on SanditZZ/homebrew-tap. The default
+#   1. The HOMEBREW_TAP_DEPLOY_KEY secret: the private half of an SSH deploy
+#      key registered on SanditZZ/homebrew-tap with write access. The default
 #      GITHUB_TOKEN cannot push to a different repository.
+#
+#      A deploy key rather than a personal access token, deliberately. A PAT
+#      carrying contents:write can write to every repository the account owns,
+#      so leaking one from CI costs the whole account; this key can write to
+#      the tap and nothing else. It also does not expire, and needs no browser
+#      step to create. Rotate by removing the key from the tap's Deploy keys
+#      settings and repeating the steps in RELEASING.md.
 #   2. A Casks/quotebar.rb file already in the tap. This workflow updates an
 #      existing cask; it deliberately does not create one, because the initial
 #      cask needs a human decision about name, description and dependencies.
@@ -54,12 +61,12 @@ jobs:
       TAG: ${{ inputs.release_tag }}
 
     steps:
-      - name: Fail early without a tap token
+      - name: Fail early without a tap deploy key
         env:
-          TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          DEPLOY_KEY: ${{ secrets.HOMEBREW_TAP_DEPLOY_KEY }}
         run: |
-          if [ -z "${TOKEN}" ]; then
-            echo "::error::HOMEBREW_TAP_TOKEN is not set. The tap cannot be updated. See RELEASING.md."
+          if [ -z "${DEPLOY_KEY}" ]; then
+            echo "::error::HOMEBREW_TAP_DEPLOY_KEY is not set. The tap cannot be updated. See RELEASING.md."
             exit 1
           fi
 
@@ -90,7 +97,10 @@ jobs:
         uses: actions/checkout@v5
         with:
           repository: ${{ env.TAP_REPO }}
-          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          # ssh-key rather than token: checkout configures SSH and sets the
+          # remote to git@github.com, so the push below authenticates as the
+          # deploy key.
+          ssh-key: ${{ secrets.HOMEBREW_TAP_DEPLOY_KEY }}
           path: tap
 
       - name: Update the cask
