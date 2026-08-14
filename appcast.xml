@@ -3,19 +3,28 @@
     <channel>
         <title>QuoteBar</title>
         <item>
+            <title>0.4.0</title>
+            <pubDate>Fri, 14 Aug 2026 04:45:48 +0000</pubDate>
+            <sparkle:version>4</sparkle:version>
+            <sparkle:shortVersionString>0.4.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://sanditzz.github.io/quotebar-macos/releases/QuoteBar-0.4.0.zip" length="2349427" type="application/octet-stream" sparkle:edSignature="QTN6Mif9zqs6KKr4TumfpH5ybckbsnBHZb1Cw+NhCFfbithpziQRWtcbZctfPPc/OSysvfmxiBBwzQRWgkwLAw=="/>
+            <sparkle:deltas>
+                <enclosure url="https://sanditzz.github.io/quotebar-macos/releases/QuoteBar4-3.delta" sparkle:deltaFrom="3" length="178306" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977616" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="ZX1UYEzDQ7MSGqAkNLbeBrAmj2J1F2LB5bLrHb0cPsYlfgHp/pY4SOcsirjyVaIPNByPvVBKdfcB1e7Hhn36BQ=="/>
+                <enclosure url="https://sanditzz.github.io/quotebar-macos/releases/QuoteBar4-2.delta" sparkle:deltaFrom="2" length="277778" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977616" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="QMJxhivCa02sQiPhhue7S7QiX2ATyMUxRMvejTOuLmUVQ4rUhEr8PdZT4YWBFyE3QOhfXgKJ5vLUxIBgrq+CBA=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>0.3.0</title>
-            <pubDate>Thu, 13 Aug 2026 10:48:21 +0000</pubDate>
+            <pubDate>Fri, 14 Aug 2026 04:45:45 +0000</pubDate>
             <sparkle:version>3</sparkle:version>
             <sparkle:shortVersionString>0.3.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
             <enclosure url="https://sanditzz.github.io/quotebar-macos/releases/QuoteBar-0.3.0.zip" length="2346637" type="application/octet-stream" sparkle:edSignature="OBD5aFH8cXNOVoJEXmtsgStaSAILUmvB2yHdLEZbIklkJCk3rx1yaTrbjInsnNu/Jy/2d2MQ/zMDIJ51ZT/MAQ=="/>
-            <sparkle:deltas>
-                <enclosure url="https://sanditzz.github.io/quotebar-macos/releases/QuoteBar3-2.delta" sparkle:deltaFrom="2" length="259818" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977616" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="njHY8Zr3iW95YgsBfHIFZuCXNUvz7XTCglxPfoh/yiZolX85c3W0SRkBMqLEa1pMi2qTvPuTv7qZ8c+lRC/jBQ=="/>
-            </sparkle:deltas>
         </item>
         <item>
             <title>0.2.0</title>
-            <pubDate>Thu, 13 Aug 2026 10:48:18 +0000</pubDate>
+            <pubDate>Fri, 14 Aug 2026 04:45:45 +0000</pubDate>
             <sparkle:version>2</sparkle:version>
             <sparkle:shortVersionString>0.2.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
