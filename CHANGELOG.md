@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - MOVED: the update controls now have their own Updates tab in Settings, instead of sitting at the bottom of General under Notifications. The switch, the Check Now button and the last-checked line are unchanged, and the "Check for Updates..." item in the menu bar menu still works as before
 
+### Fixed
+
+- Share Quote, Read Aloud and Check for Updates in the menu bar's right-click menu looked available when there was nothing for them to act on, and clicking them did nothing. They are now greyed out with no quote to share or read, and while an update check is already running
+
 ## [0.3.0] - 2026-08-13
 
 Window chrome rework, and QuoteBar now appears in the Command-Tab switcher while a window is open.
