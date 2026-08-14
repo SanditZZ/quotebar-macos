@@ -371,5 +371,5 @@ jobs:
     uses: ./.github/workflows/update-homebrew-tap.yml
     with:
       release_tag: ${{ needs.release.outputs.tag }}
-    # The called workflow needs HOMEBREW_TAP_TOKEN.
+    # The called workflow needs HOMEBREW_TAP_DEPLOY_KEY.
     secrets: inherit
