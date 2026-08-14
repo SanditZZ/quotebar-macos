@@ -167,6 +167,14 @@ final class MenuBarController {
 
         let menu = NSMenu()
 
+        // Without this, every `isEnabled = false` below is discarded. AppKit
+        // re-derives each item's enabled state just before the menu is shown,
+        // and with automatic enabling it enables anything whose target
+        // responds to the action — which is every item here. Share, Read Aloud
+        // and Check for Updates then look available with nothing to act on,
+        // and clicking them does nothing at all.
+        menu.autoenablesItems = false
+
         menu.addItem(withTitle: "New Quote", action: #selector(requestNewQuoteFromMenu), keyEquivalent: "n")
             .target = self
         menu.addItem(.separator())
