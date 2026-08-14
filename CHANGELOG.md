@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-08-14
+
+Settings gains an Updates tab, and the menu bar menu stops offering actions it cannot carry out.
+
 ### Changed
 
 - MOVED: the update controls now have their own Updates tab in Settings, instead of sitting at the bottom of General under Notifications. The switch, the Check Now button and the last-checked line are unchanged, and the "Check for Updates..." item in the menu bar menu still works as before
@@ -71,6 +75,7 @@ First public release. QuoteBar can now update itself, which is what makes every 
 - The two backup export buttons never opened a save panel, because all three file panels were attached to the same view and SwiftUI keeps only the last one
 - The app would have crashed on launch once Sparkle was added, because the bundle embedded the framework without declaring a runpath to reach it. CI now inspects the built binary, which the test suite cannot do
 
-[Unreleased]: https://github.com/SanditZZ/quotebar-macos/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/SanditZZ/quotebar-macos/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/SanditZZ/quotebar-macos/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/SanditZZ/quotebar-macos/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/SanditZZ/quotebar-macos/releases/tag/v0.2.0
