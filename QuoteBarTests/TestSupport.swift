@@ -52,9 +52,10 @@ enum TestSupport {
     static func customQuoteSnapshot(
         text: String,
         author: String? = "Test Author",
-        addedAt: Date = referenceDate
+        addedAt: Date = referenceDate,
+        packId: String? = nil
     ) -> CustomQuoteSnapshot {
-        CustomQuoteSnapshot(id: UUID(), text: text, author: author, addedAt: addedAt)
+        CustomQuoteSnapshot(id: UUID(), text: text, author: author, addedAt: addedAt, packId: packId)
     }
 
     static func tag(name: String, createdAt: Date = referenceDate) -> TagSnapshot {
