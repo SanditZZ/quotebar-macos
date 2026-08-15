@@ -64,6 +64,20 @@ jobs:
             SWIFT_TREAT_WARNINGS_AS_ERRORS=YES \
             | xcpretty
 
+      # The test suite cannot catch a missing framework runpath: tests run in a
+      # host that resolves embedded frameworks differently, so a bundle that
+      # dies on launch with "Library not loaded: @rpath/Sparkle.framework"
+      # still reports 145 green tests. This inspects the built binary instead.
+      # It runs before the tests so the failure is the first thing reported.
+      - name: Check embedded frameworks
+        run: |
+          set -euo pipefail
+          APP="$(xcodebuild -project QuoteBar.xcodeproj -scheme QuoteBar \
+            -configuration Debug -showBuildSettings 2>/dev/null \
+            | awk -F' = ' '/ BUILT_PRODUCTS_DIR =/ {print $2; exit}' \
+            | tr -d '[:space:]')/QuoteBar.app"
+          scripts/check-embedded-frameworks.sh "$APP"
+
       - name: Test
         run: |
           set -o pipefail

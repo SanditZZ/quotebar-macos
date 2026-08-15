@@ -82,6 +82,29 @@ enum AppColors {
     /// Tertiary text, e.g. timestamps and captions.
     static let textTertiary = Color.adaptiveTextTertiary
 
+    // MARK: - Window Chrome
+
+    /// Custom traffic lights on the borderless windows. These are fixed tones
+    /// rather than adaptive ones on purpose: they reproduce the system's own
+    /// button colors, which do not change between light and dark. Only the
+    /// inactive state adapts, matching how macOS greys out a background
+    /// window's controls.
+
+    static let trafficLightClose = Color(red: 1.0, green: 0.38, blue: 0.34)
+    static let trafficLightMiniaturize = Color(red: 1.0, green: 0.74, blue: 0.18)
+
+    /// Traffic light on an inactive window.
+    static let trafficLightInactive = Color.primary.opacity(0.15)
+
+    /// The glyph revealed inside a traffic light on hover.
+    static let trafficLightGlyph = Color.black.opacity(0.5)
+
+    /// Background of the selected sidebar row.
+    static let sidebarSelection = Color.accentColor.opacity(0.16)
+
+    /// Background of a sidebar row under the pointer.
+    static let sidebarHover = Color.primary.opacity(0.06)
+
     // MARK: - Helpers
 
     /// A translucent tint of any color, for badge backgrounds and soft fills.

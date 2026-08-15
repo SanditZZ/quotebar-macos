@@ -37,8 +37,13 @@ struct HistoryView: View {
             } else {
                 List(visibleQuotes) { quote in
                     row(for: quote)
+                        .listRowBackground(Color.clear)
                 }
                 .listStyle(.inset)
+                // The window is vibrant now, and a List paints its own opaque
+                // backing over it, which would leave a flat grey slab in an
+                // otherwise translucent window.
+                .scrollContentBackground(.hidden)
             }
         }
         .padding(DesignTokens.Spacing.popoverPadding)
@@ -143,6 +148,10 @@ struct HistoryView: View {
                     .foregroundStyle(quote.isFavorite ? AppColors.warning : AppColors.textTertiary)
             }
             .buttonStyle(.plain)
+            // One row per quote, so the label has to name the quote or every
+            // star in the list announces identically.
+            .accessibilityLabel("Favorite: \(quote.text)")
+            .accessibilityValue(quote.isFavorite ? "On" : "Off")
         }
         .padding(.vertical, DesignTokens.Spacing.extraSmall)
     }

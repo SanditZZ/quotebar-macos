@@ -27,6 +27,10 @@ struct QuoteCardView: View {
                     }
                     .buttonStyle(.plain)
                     .help(quote.isFavorite ? "Remove from favorites" : "Add to favorites")
+                    // Both "star" and "star.fill" carry the same stock
+                    // description, so state has to be said explicitly.
+                    .accessibilityLabel("Favorite")
+                    .accessibilityValue(quote.isFavorite ? "On" : "Off")
                 }
             }
 

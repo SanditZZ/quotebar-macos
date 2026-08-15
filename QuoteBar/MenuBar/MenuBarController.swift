@@ -17,6 +17,7 @@ final class MenuBarController {
     private let tracker: QuoteTracker
     private let settings: AppSettings
     private let windowCoordinator: WindowCoordinator
+    private let updateService: UpdateService
 
     private var statusItem: NSStatusItem?
     private var popover: NSPopover?
@@ -50,10 +51,12 @@ final class MenuBarController {
         notificationService: QuoteNotificationService,
         customQuoteLibrary: CustomQuoteLibrary,
         tagLibrary: QuoteTagLibrary,
-        backupService: QuoteBackupService
+        backupService: QuoteBackupService,
+        updateService: UpdateService
     ) {
         self.tracker = tracker
         self.settings = settings
+        self.updateService = updateService
         self.windowCoordinator = WindowCoordinator(
             tracker: tracker,
             settings: settings,
@@ -62,7 +65,8 @@ final class MenuBarController {
             notificationService: notificationService,
             customQuoteLibrary: customQuoteLibrary,
             tagLibrary: tagLibrary,
-            backupService: backupService
+            backupService: backupService,
+            updateService: updateService
         )
     }
 
@@ -89,6 +93,13 @@ final class MenuBarController {
     /// Fired by the global "New Quote" shortcut. Opens the popover if it
     /// wasn't already showing, then always fetches a new quote — the same
     /// outcome as clicking the status item and pressing "New Quote".
+    /// Open Settings from outside the status item menu — the application
+    /// menu's Cmd+comma item routes here, so that shortcut opens the app's own
+    /// borderless window rather than a second, system-chrome one.
+    func openSettingsWindow() {
+        windowCoordinator.showSettings()
+    }
+
     func triggerFromGlobalHotKey() {
         guard let button = statusItem?.button else { return }
 
@@ -156,6 +167,14 @@ final class MenuBarController {
 
         let menu = NSMenu()
 
+        // Without this, every `isEnabled = false` below is discarded. AppKit
+        // re-derives each item's enabled state just before the menu is shown,
+        // and with automatic enabling it enables anything whose target
+        // responds to the action — which is every item here. Share, Read Aloud
+        // and Check for Updates then look available with nothing to act on,
+        // and clicking them does nothing at all.
+        menu.autoenablesItems = false
+
         menu.addItem(withTitle: "New Quote", action: #selector(requestNewQuoteFromMenu), keyEquivalent: "n")
             .target = self
         menu.addItem(.separator())
@@ -172,6 +191,11 @@ final class MenuBarController {
         menu.items.last?.isEnabled = tracker.isSpeaking || tracker.currentQuote != nil
         menu.addItem(withTitle: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
             .target = self
+        menu.addItem(withTitle: "Check for Updates…", action: #selector(checkForUpdatesFromMenu), keyEquivalent: "")
+            .target = self
+        // Sparkle ignores a second check while one is in flight, so the item
+        // reflects that rather than looking like it did nothing.
+        menu.items.last?.isEnabled = updateService.canCheck
         menu.addItem(.separator())
         menu.addItem(withTitle: "Quit QuoteBar", action: #selector(quit), keyEquivalent: "q")
             .target = self
@@ -185,6 +209,10 @@ final class MenuBarController {
 
     @objc private func requestNewQuoteFromMenu() {
         Task { await tracker.requestNewQuote() }
+    }
+
+    @objc private func checkForUpdatesFromMenu() {
+        updateService.checkForUpdates()
     }
 
     @objc private func openHistory() {

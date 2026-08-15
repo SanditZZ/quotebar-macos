@@ -31,9 +31,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             notificationService: environment.notificationService,
             customQuoteLibrary: environment.customQuoteLibrary,
             tagLibrary: environment.tagLibrary,
-            backupService: environment.backupService
+            backupService: environment.backupService,
+            updateService: environment.updateService
         )
         menuBarController?.install()
+
+        // Built by hand because this is an AppKit entry point rather than a
+        // SwiftUI `App` — see `QuoteBarApp` for why, and `MainMenu` for what
+        // stops working without it.
+        MainMenu.install(openSettings: #selector(openSettingsFromMenu), target: self)
 
         environment.hotKeyService.start { [weak menuBarController] in
             menuBarController?.triggerFromGlobalHotKey()
@@ -57,6 +63,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         observeSleep()
 
         AppLog.app.info("[App] Ready")
+    }
+
+    /// Cmd+comma. Routed through the menu bar controller so it opens the same
+    /// window the status item does, rather than a second one.
+    @objc private func openSettingsFromMenu() {
+        menuBarController?.openSettingsWindow()
     }
 
     func applicationWillTerminate(_ notification: Notification) {

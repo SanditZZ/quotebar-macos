@@ -68,7 +68,7 @@ struct PopoverContentView: View {
     }
 
     private var footer: some View {
-        HStack(spacing: DesignTokens.Spacing.medium) {
+        HStack(spacing: DesignTokens.Spacing.extraSmall) {
             footerButton("History", systemImage: "clock", action: onOpenHistory)
             footerButton("Share", systemImage: "square.and.arrow.up", action: onShare)
                 .disabled(tracker.currentQuote == nil)
@@ -83,14 +83,26 @@ struct PopoverContentView: View {
             footerButton("Quit", systemImage: "power", action: onQuit)
         }
         .buttonStyle(.plain)
-        .font(DesignTokens.Typography.caption)
         .foregroundStyle(AppColors.textSecondary)
     }
 
+    /// Icon-only: the five captions together are far wider than
+    /// `popoverWidth`, and as visible text they wrapped to one or two
+    /// characters per line. The name survives as a tooltip on hover and as the
+    /// accessibility label, so nothing is lost to a pointer or to VoiceOver.
     private func footerButton(_ title: String, systemImage: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Label(title, systemImage: systemImage)
+            Image(systemName: systemImage)
+                .font(.system(size: DesignTokens.Icons.standard))
+                .frame(
+                    width: DesignTokens.Layout.footerButtonSize.width,
+                    height: DesignTokens.Layout.footerButtonSize.height
+                )
+                // The glyph alone is a small target; the frame is the button.
+                .contentShape(Rectangle())
         }
+        .help(title)
+        .accessibilityLabel(title)
     }
 }
 
