@@ -40,11 +40,12 @@ Run the CI checks locally. They must pass:
 ./scripts/ci-local.sh
 ```
 
-That runs exactly what GitHub Actions runs — the same two `xcodebuild` invocations with the same flags — so a red pipeline is caught before you push rather than after.
+That runs exactly what GitHub Actions runs — build, then a check that every embedded framework (e.g. Sparkle) is actually reachable at launch, then the test suite, all with the same flags — so a red pipeline is caught before you push rather than after. The frameworks check exists because a missing framework runpath crashes the app on launch but not the test suite, which resolves embedded frameworks differently than a real launch does.
 
 ```bash
-./scripts/ci-local.sh build   # build only
-./scripts/ci-local.sh test    # tests only
+./scripts/ci-local.sh build        # build only
+./scripts/ci-local.sh frameworks   # embedded frameworks check only
+./scripts/ci-local.sh test         # tests only
 ```
 
 The build must stay **warning-free**; CI treats Swift warnings as errors. If your change introduces a warning you genuinely cannot avoid, say so in the pull request and explain why — do not weaken the check.
