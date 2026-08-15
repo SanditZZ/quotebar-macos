@@ -23,5 +23,5 @@ struct QuoteBackup: Equatable, Sendable, Codable {
     let history: [QuoteSnapshot]
     let customQuotes: [CustomQuoteSnapshot]
 
-    static let currentFormatVersion = 1
+    static let currentFormatVersion = 2
 }
