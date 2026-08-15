@@ -21,6 +21,9 @@ final class CustomQuoteLibrary {
     private(set) var errorMessage: String?
     private(set) var lastImportSummary: String?
 
+    private(set) var installedPacks: [InstalledPackSummary] = []
+    private(set) var lastPackActionSummary: String?
+
     private let repository: any CustomQuoteRepository
 
     init(repository: any CustomQuoteRepository) {
@@ -33,6 +36,7 @@ final class CustomQuoteLibrary {
     func refresh() {
         do {
             entries = try repository.allEntries()
+            installedPacks = try repository.installedPackSummaries()
             errorMessage = nil
         } catch {
             AppLog.persistence.error("[Persistence] Failed to load custom quote library: \(error.localizedDescription, privacy: .public)")
@@ -95,6 +99,54 @@ final class CustomQuoteLibrary {
             AppLog.persistence.error("[Persistence] Custom quote import failed: \(error.localizedDescription, privacy: .public)")
             errorMessage = "Couldn't read \"\(url.lastPathComponent)\"."
         }
+    }
+
+    /// Read and parse a pack file the user picked via `.fileImporter`, then
+    /// install every non-duplicate quote in it. Files only, per issue #31 —
+    /// no registry or URL fetching.
+    func installPack(at url: URL) {
+        guard url.pathExtension.lowercased() == "json" else {
+            errorMessage = "\"\(url.lastPathComponent)\" isn't a QuoteBar pack file (expected .json)."
+            return
+        }
+
+        let didStartAccess = url.startAccessingSecurityScopedResource()
+        defer { if didStartAccess { url.stopAccessingSecurityScopedResource() } }
+
+        do {
+            let data = try Data(contentsOf: url)
+            let pack = try QuotePackSerializer.decode(data)
+            let result = try repository.installPack(pack)
+
+            lastPackActionSummary = Self.installSummary(for: result, packName: pack.name)
+            errorMessage = nil
+            refresh()
+        } catch is QuotePackSerializationError {
+            errorMessage = "\"\(url.lastPathComponent)\" needs a newer version of QuoteBar to install."
+        } catch {
+            AppLog.persistence.error("[Persistence] Pack install failed: \(error.localizedDescription, privacy: .public)")
+            errorMessage = "Couldn't install \"\(url.lastPathComponent)\"."
+        }
+    }
+
+    func uninstallPack(packId: String) {
+        do {
+            let removed = try repository.uninstallPack(packId: packId)
+            lastPackActionSummary = "Removed \(removed) quote\(removed == 1 ? "" : "s")."
+            errorMessage = nil
+            refresh()
+        } catch {
+            AppLog.persistence.error("[Persistence] Pack uninstall failed: \(error.localizedDescription, privacy: .public)")
+            errorMessage = "Couldn't remove that pack."
+        }
+    }
+
+    private static func installSummary(for result: QuotePackInstallResult, packName: String) -> String {
+        var parts = ["Installed \"\(packName)\": \(result.added) quote\(result.added == 1 ? "" : "s") added"]
+        if result.skippedDuplicates > 0 {
+            parts.append("\(result.skippedDuplicates) duplicate\(result.skippedDuplicates == 1 ? "" : "s") skipped")
+        }
+        return parts.joined(separator: ", ") + "."
     }
 
     private static func summary(for result: CustomQuoteImportResult, skippedInvalidRows: Int) -> String {

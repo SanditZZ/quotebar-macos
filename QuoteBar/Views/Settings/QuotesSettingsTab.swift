@@ -20,6 +20,10 @@ struct QuotesSettingsTab: View {
                 CustomQuotesEditor(library: customQuoteLibrary)
             }
 
+            SettingsSection("Packs") {
+                PacksEditor(library: customQuoteLibrary)
+            }
+
             SettingsSection("Tags") {
                 TagsEditor(library: tagLibrary)
             }
