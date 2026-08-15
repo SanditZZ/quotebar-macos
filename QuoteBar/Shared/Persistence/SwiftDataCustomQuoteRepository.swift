@@ -150,6 +150,7 @@ final class SwiftDataCustomQuoteRepository: CustomQuoteRepository {
     /// Shared by `add`, `importMany` and `installPack` — the only difference
     /// between "the user typed one quote," "a file import added many," and
     /// "a pack installed many" is which `packId` (if any) the new rows carry.
+    @discardableResult
     private func insertEntry(text: String, author: String?, packId: String?) throws -> CustomQuoteSnapshot {
         let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedText.isEmpty else { throw CustomQuoteRepositoryError.emptyText }
