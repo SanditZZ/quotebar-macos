@@ -108,14 +108,11 @@ final class QuoteBackupService {
             let backup = try QuoteBackupSerializer.decode(data)
 
             let historyAdded = try quoteRepository.importHistory(backup.history)
-            // Deliberately drops `$0.packId`: `ParsedCustomQuote`/`importMany`
-            // have no provenance concept yet, so a restored backup always
-            // comes back user-owned even if some entries were pack-installed
-            // when exported. Closing that gap belongs with the pack
-            // install/uninstall work (issue #31), which touches this exact
-            // path anyway.
+            // Carries `$0.packId` through so a restored quote that was
+            // pack-installed when exported comes back pack-owned, not
+            // silently reassigned to the user — see `ParsedCustomQuote.packId`.
             let parsedCustomQuotes = backup.customQuotes.map {
-                ParsedCustomQuote(text: $0.text, author: $0.author)
+                ParsedCustomQuote(text: $0.text, author: $0.author, packId: $0.packId)
             }
             let customResult = try customQuoteRepository.importMany(parsedCustomQuotes)
 

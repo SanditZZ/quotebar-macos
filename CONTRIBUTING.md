@@ -155,6 +155,33 @@ Repository tests run against a real SwiftData stack via `ModelContainerFactory.m
 
 ---
 
+## Contributing a quote pack
+
+A pack is a themed collection of quotes a user installs from a file (Settings → Quotes → Packs → "Install Pack…"). See issue #31 for the full design discussion; this section is the short version for a content-only pull request.
+
+**Format** — a JSON file matching `QuotePack` (`Shared/Models/QuotePack.swift`):
+
+```json
+{
+  "formatVersion": 1,
+  "packId": "stoicism-basics",
+  "name": "Stoicism Basics",
+  "maintainer": "Your name or handle",
+  "license": "Public Domain",
+  "attribution": "Optional free-text credit line",
+  "quotes": [
+    { "text": "You have power over your mind, not outside events.", "author": "Marcus Aurelius" }
+  ]
+}
+```
+
+- `packId` is a stable, lowercase, hyphenated slug (`stoicism-basics`, not `Stoicism Basics` or `stoicismBasics`) — it is what `PackIdFormatter` turns back into a display name once installed, and it is never reused for different content once published.
+- `license` is **required**, not optional. Packs are redistributed content: only public-domain or permissively-licensed text is accepted, with attribution where the license calls for it. This mirrors the standard the bundled offline set (`Resources/BackupQuotes.json`) already holds itself to, and why the on-device AI provider is never asked to attribute a quote to a real person — see `CLAUDE.md` §7 if you're curious why that rule exists.
+- Keep pack pull requests **content-only** — a new pack file plus, if it's the first one, an entry in a packs index/README. Don't mix in code changes; those go through the design/implementation issue (#31) instead.
+- See `docs/example-packs/stoicism-basics.json` for a complete, working example you can copy.
+
+---
+
 ## Commits and pull requests
 
 **Commit messages** are one sentence, capitalised, past tense, describing one logical change:

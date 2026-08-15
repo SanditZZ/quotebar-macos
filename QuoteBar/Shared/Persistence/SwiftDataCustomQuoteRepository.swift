@@ -24,31 +24,7 @@ final class SwiftDataCustomQuoteRepository: CustomQuoteRepository {
 
     @discardableResult
     func add(text: String, author: String?) throws -> CustomQuoteSnapshot {
-        let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedText.isEmpty else { throw CustomQuoteRepositoryError.emptyText }
-
-        let existingTexts = try allEntries().map(\.text) + BundledQuoteProvider.allTexts
-        guard !CustomQuoteDeduplicator.isDuplicate(trimmedText, against: existingTexts) else {
-            throw CustomQuoteRepositoryError.duplicate
-        }
-
-        let trimmedAuthor = author?.trimmingCharacters(in: .whitespacesAndNewlines)
-        let entry = CustomQuoteEntry(
-            text: trimmedText,
-            author: (trimmedAuthor?.isEmpty == false) ? trimmedAuthor : nil
-        )
-        context.insert(entry)
-
-        do {
-            try context.save()
-            AppLog.persistence.debug("[Persistence] Added a custom quote")
-            return entry.snapshot
-        } catch {
-            AppLog.persistence.error(
-                "[Persistence] Custom quote save failed: \(error.localizedDescription, privacy: .public)"
-            )
-            throw CustomQuoteRepositoryError.saveFailed(underlying: error)
-        }
+        try insertEntry(text: text, author: author, packId: nil)
     }
 
     func importMany(_ parsed: [ParsedCustomQuote]) throws -> CustomQuoteImportResult {
@@ -57,7 +33,7 @@ final class SwiftDataCustomQuoteRepository: CustomQuoteRepository {
 
         for candidate in parsed {
             do {
-                try add(text: candidate.text, author: candidate.author)
+                try insertEntry(text: candidate.text, author: candidate.author, packId: candidate.packId)
                 added += 1
             } catch CustomQuoteRepositoryError.duplicate {
                 skipped += 1
@@ -70,6 +46,58 @@ final class SwiftDataCustomQuoteRepository: CustomQuoteRepository {
             "[Persistence] Imported custom quotes: \(added, privacy: .public) added, \(skipped, privacy: .public) skipped"
         )
         return CustomQuoteImportResult(added: added, skippedDuplicates: skipped)
+    }
+
+    @discardableResult
+    func installPack(_ pack: QuotePack) throws -> QuotePackInstallResult {
+        var added = 0
+        var skipped = 0
+
+        for quote in pack.quotes {
+            do {
+                try insertEntry(text: quote.text, author: quote.author, packId: pack.packId)
+                added += 1
+            } catch CustomQuoteRepositoryError.duplicate {
+                skipped += 1
+            } catch CustomQuoteRepositoryError.emptyText {
+                skipped += 1
+            }
+        }
+
+        AppLog.persistence.info(
+            "[Persistence] Installed pack \(pack.packId, privacy: .public): \(added, privacy: .public) added, \(skipped, privacy: .public) skipped"
+        )
+        return QuotePackInstallResult(added: added, skippedDuplicates: skipped)
+    }
+
+    @discardableResult
+    func uninstallPack(packId: String) throws -> Int {
+        let matches = try fetchAllEntries().filter { $0.packId == packId }
+        guard !matches.isEmpty else { return 0 }
+
+        do {
+            for entry in matches {
+                context.delete(entry)
+            }
+            try context.save()
+            AppLog.persistence.info(
+                "[Persistence] Uninstalled pack \(packId, privacy: .public): removed \(matches.count, privacy: .public) quotes"
+            )
+            return matches.count
+        } catch {
+            AppLog.persistence.error(
+                "[Persistence] Pack uninstall failed: \(error.localizedDescription, privacy: .public)"
+            )
+            throw CustomQuoteRepositoryError.saveFailed(underlying: error)
+        }
+    }
+
+    func installedPackSummaries() throws -> [InstalledPackSummary] {
+        let packIds = try fetchAllEntries().compactMap(\.packId)
+        let counts = Dictionary(packIds.map { ($0, 1) }, uniquingKeysWith: +)
+        return counts
+            .map { InstalledPackSummary(packId: $0.key, quoteCount: $0.value) }
+            .sorted { $0.packId < $1.packId }
     }
 
     func remove(id: UUID) throws {
@@ -118,6 +146,39 @@ final class SwiftDataCustomQuoteRepository: CustomQuoteRepository {
     }
 
     // MARK: - Helpers
+
+    /// Shared by `add`, `importMany` and `installPack` — the only difference
+    /// between "the user typed one quote," "a file import added many," and
+    /// "a pack installed many" is which `packId` (if any) the new rows carry.
+    @discardableResult
+    private func insertEntry(text: String, author: String?, packId: String?) throws -> CustomQuoteSnapshot {
+        let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedText.isEmpty else { throw CustomQuoteRepositoryError.emptyText }
+
+        let existingTexts = try allEntries().map(\.text) + BundledQuoteProvider.allTexts
+        guard !CustomQuoteDeduplicator.isDuplicate(trimmedText, against: existingTexts) else {
+            throw CustomQuoteRepositoryError.duplicate
+        }
+
+        let trimmedAuthor = author?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let entry = CustomQuoteEntry(
+            text: trimmedText,
+            author: (trimmedAuthor?.isEmpty == false) ? trimmedAuthor : nil,
+            packId: packId
+        )
+        context.insert(entry)
+
+        do {
+            try context.save()
+            AppLog.persistence.debug("[Persistence] Added a custom quote")
+            return entry.snapshot
+        } catch {
+            AppLog.persistence.error(
+                "[Persistence] Custom quote save failed: \(error.localizedDescription, privacy: .public)"
+            )
+            throw CustomQuoteRepositoryError.saveFailed(underlying: error)
+        }
+    }
 
     private func fetchAllEntries() throws -> [CustomQuoteEntry] {
         do {

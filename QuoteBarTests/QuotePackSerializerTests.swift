@@ -78,4 +78,29 @@ struct QuotePackSerializerTests {
             try QuotePackSerializer.decode(Data("not json".utf8))
         }
     }
+
+    @Test("The pack format documented in CONTRIBUTING.md and shipped as docs/example-packs/stoicism-basics.json decodes correctly")
+    func decodesTheDocumentedExampleFormat() throws {
+        let json = """
+        {
+          "formatVersion": 1,
+          "packId": "stoicism-basics",
+          "name": "Stoicism Basics",
+          "maintainer": "QuoteBar",
+          "license": "Public Domain",
+          "attribution": "Public-domain English translations of the Stoic philosophers.",
+          "quotes": [
+            { "text": "You have power over your mind, not outside events.", "author": "Marcus Aurelius" },
+            { "text": "No man is free who is not master of himself.", "author": "Epictetus" }
+          ]
+        }
+        """
+
+        let pack = try QuotePackSerializer.decode(Data(json.utf8))
+
+        #expect(pack.packId == "stoicism-basics")
+        #expect(pack.license == "Public Domain")
+        #expect(pack.quotes.count == 2)
+        #expect(pack.quotes.first?.author == "Marcus Aurelius")
+    }
 }

@@ -32,6 +32,14 @@ private final class FakeCustomQuoteRepository: CustomQuoteRepository {
         entries.removeAll { ids.contains($0.id) }
         return before - entries.count
     }
+
+    func installPack(_ pack: QuotePack) throws -> QuotePackInstallResult {
+        QuotePackInstallResult(added: 0, skippedDuplicates: 0)
+    }
+
+    func uninstallPack(packId: String) throws -> Int { 0 }
+
+    func installedPackSummaries() throws -> [InstalledPackSummary] { [] }
 }
 
 @Suite("Custom quote provider")

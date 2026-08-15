@@ -16,6 +16,18 @@ import Foundation
 struct ParsedCustomQuote: Equatable, Sendable {
     let text: String
     let author: String?
+
+    /// The pack this quote came from, or `nil`. Always `nil` for a file
+    /// import (JSON/CSV quote import has no pack concept) — only set when a
+    /// backup restore reconstructs `ParsedCustomQuote`s from
+    /// `CustomQuoteSnapshot`s that carry their own provenance.
+    let packId: String?
+
+    init(text: String, author: String?, packId: String? = nil) {
+        self.text = text
+        self.author = author
+        self.packId = packId
+    }
 }
 
 /// The result of parsing an import file.

@@ -39,6 +39,23 @@ struct CustomQuoteImportResult: Equatable, Sendable {
     let skippedDuplicates: Int
 }
 
+/// The outcome of installing a `QuotePack`.
+struct QuotePackInstallResult: Equatable, Sendable {
+    let added: Int
+    let skippedDuplicates: Int
+}
+
+/// One installed pack, as derived from the entries that carry its `packId` —
+/// there is no separate pack-metadata store. A pack's friendly `name` is only
+/// known at install time (see `CustomQuoteLibrary.installPack(at:)`'s summary
+/// text); once installed, only the stable `packId` persists, so the UI
+/// formats that into a display string (see `PackIdFormatter`).
+struct InstalledPackSummary: Equatable, Sendable, Identifiable {
+    var id: String { packId }
+    let packId: String
+    let quoteCount: Int
+}
+
 @MainActor
 protocol CustomQuoteRepository: AnyObject {
 
@@ -65,4 +82,22 @@ protocol CustomQuoteRepository: AnyObject {
     /// read from `allEntries()`.
     @discardableResult
     func removeMany(ids: Set<UUID>) throws -> Int
+
+    /// Add every quote in `pack` that isn't a duplicate, tagging each with
+    /// `pack.packId` so `uninstallPack` can later remove exactly these rows.
+    /// Installing the same pack twice is safe: quotes already present (from
+    /// the first install, or added by hand) are simply skipped again.
+    @discardableResult
+    func installPack(_ pack: QuotePack) throws -> QuotePackInstallResult
+
+    /// Remove every entry whose `packId` matches. A user-typed entry
+    /// (`packId == nil`) or a different pack's entry is never touched, even
+    /// if it happens to share text with something this pack installed —
+    /// only rows this exact pack owns are removed.
+    @discardableResult
+    func uninstallPack(packId: String) throws -> Int
+
+    /// Every distinct installed pack, with how many entries currently carry
+    /// its `packId`.
+    func installedPackSummaries() throws -> [InstalledPackSummary]
 }
