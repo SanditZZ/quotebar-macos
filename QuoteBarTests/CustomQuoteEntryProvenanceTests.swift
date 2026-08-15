@@ -54,9 +54,8 @@ struct CustomQuoteEntryProvenanceTests {
         try context.save()
 
         let fetched = try context.fetch(FetchDescriptor<CustomQuoteEntry>())
-        let byText = Dictionary(uniqueKeysWithValues: fetched.map { ($0.text, $0.packId) })
 
-        #expect(byText["User's own quote"] == nil)
-        #expect(byText["Pack quote"] == "stoicism-basics")
+        #expect(fetched.first { $0.text == "User's own quote" }?.packId == nil)
+        #expect(fetched.first { $0.text == "Pack quote" }?.packId == "stoicism-basics")
     }
 }
