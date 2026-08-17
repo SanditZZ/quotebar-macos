@@ -38,10 +38,22 @@ Every quote is tagged with which of the four produced it, so the source badge on
 
 ## Install
 
+### Homebrew
+
+```bash
+brew install sanditzz/tap/quotebar
+```
+
+The easiest route. This installs the same DMG the release page offers, drops the app in `/Applications`, and clears the Gatekeeper quarantine flag for you, so there is nothing to get past on first launch. The cask is updated as soon as a new version is published.
+
+### Download a release
+
 Download the latest `QuoteBar-x.y.z.dmg` from **[Releases](https://github.com/SanditZZ/quotebar-macos/releases)**, open it, and drag **QuoteBar** to your Applications folder.
 
 > [!IMPORTANT]
-> Builds are **not notarized by Apple** yet, so macOS refuses to open the app the first time. After moving it to Applications, run this once:
+> **Skip this if you installed with Homebrew** — the cask clears the quarantine flag for you. It applies only to a manual download, which macOS treats like anything else that arrived through a browser.
+>
+> Builds are **not notarized by Apple**, so macOS refuses to open the app the first time. After moving it to Applications, run this once:
 >
 > ```bash
 > xattr -dr com.apple.quarantine /Applications/QuoteBar.app
@@ -55,7 +67,7 @@ This is a one-time cost. QuoteBar installs its own updates after that, so the pr
 
 ### Updating
 
-QuoteBar checks for a new version once a day and offers it when one appears. To check immediately, use **Settings → General → Updates → Check Now**, or **Check for Updates…** in the menu bar menu. The daily check can be switched off in the same place.
+QuoteBar checks for a new version once a day and offers it when one appears. To check immediately, use **Settings → Updates → Check Now**, or **Check for Updates…** in the menu bar menu. The daily check can be switched off in the same place.
 
 Updates are verified against an EdDSA public key built into the app, so a tampered or unsigned update is refused regardless of where it came from.
 

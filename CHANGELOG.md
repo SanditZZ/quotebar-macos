@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Homebrew is now documented as the easiest way to install QuoteBar, with `brew install sanditzz/tap/quotebar` leading the Install section. The cask has been kept in step with every release since 0.2.0 and clears the Gatekeeper quarantine flag as it installs, so that route needs no terminal step and no trip through Privacy and Security, but the README had never mentioned it and sent everyone down the manual path instead
+- The manual download instructions now say plainly that the Gatekeeper step applies only to a browser download, so anyone who used Homebrew can skip it
+
+### Fixed
+
+- The README sent people to General for the Check Now button, which has had its own Updates tab in Settings since 0.4.0
+
 ## [0.4.0] - 2026-08-14
 
 Settings gains an Updates tab, and the menu bar menu stops offering actions it cannot carry out.
