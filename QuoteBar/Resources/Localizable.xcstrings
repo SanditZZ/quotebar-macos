@@ -2,6 +2,9 @@
   "sourceLanguage": "en",
   "strings": {
     "%@ share style": {},
+    "%@: %lld": {
+      "comment": "Accessibility label for one row of a History insights breakdown: a label and how many quotes carry it"
+    },
     "%lld": {},
     "%lld pack%@": {},
     "%lld quote%@": {},
@@ -15,6 +18,9 @@
     "Add": {},
     "Add to favorites": {},
     "Author (optional)": {},
+    "Authors": {
+      "comment": "Stat tile in History, shown uppercased"
+    },
     "Automatic": {},
     "Bundled offline set": {},
     "Cancel": {},
@@ -47,6 +53,9 @@
     "Export a full backup (history and your quote library) as JSON, or just your quote library as CSV. Re-importing a JSON backup restores everything without duplicating what's already here.": {},
     "Favorite": {},
     "Favorite: %@": {},
+    "Favorites": {
+      "comment": "Stat tile in History, shown uppercased"
+    },
     "Favorites only": {},
     "Fetching your first quote…": {},
     "Hide QuoteBar": {},
@@ -54,6 +63,9 @@
     "History…": {},
     "Import Backup…": {},
     "Import…": {},
+    "Insights": {
+      "comment": "Expandable section in History holding the breakdowns behind the stat tiles"
+    },
     "Install Pack…": {},
     "MINE": {
       "comment": "Quote source badge for the user's own quotes, kept very short to fit the card"
@@ -103,6 +115,9 @@
     "Remove from favorites": {},
     "Remove pack: %@": {},
     "Rename tag %@": {},
+    "Seen": {
+      "comment": "Stat tile in History counting every quote seen, shown uppercased"
+    },
     "Select": {},
     "Select All": {
       "comment": "Edit menu command"
@@ -112,6 +127,9 @@
     "Settings categories": {},
     "Settings…": {},
     "Share Quote…": {},
+    "Sources": {
+      "comment": "Heading over the per-source breakdown in History, shown uppercased"
+    },
     "Speech speed": {},
     "Speed": {},
     "System Default": {},
@@ -121,6 +139,12 @@
     "This cannot be undone.": {},
     "This removes every saved quote and favorite. This cannot be undone.": {},
     "Time": {},
+    "Top Authors": {
+      "comment": "Heading over the most-seen authors in History, shown uppercased"
+    },
+    "Top Tags": {
+      "comment": "Heading over the most-used tags in History, shown uppercased"
+    },
     "Undo": {
       "comment": "Edit menu command"
     },

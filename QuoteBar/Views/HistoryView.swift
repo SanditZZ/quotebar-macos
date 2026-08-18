@@ -24,6 +24,12 @@ struct HistoryView: View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.medium) {
             statsRow
 
+            // Nothing to break down before the first quote lands, and an empty
+            // disclosure row would only be something else to click on.
+            if tracker.stats.totalSeen > 0 {
+                HistoryInsightsView(stats: tracker.stats)
+            }
+
             HStack {
                 Toggle("Favorites only", isOn: $favoritesOnly)
                     .toggleStyle(.checkbox)
@@ -59,11 +65,16 @@ struct HistoryView: View {
         }
     }
 
-    private func statTile(_ label: String, value: String) -> some View {
+    // The label is a `LocalizedStringKey` and is uppercased by `textCase`
+    // rather than by `String.uppercased()`: a `Text` built from a plain
+    // `String` is never looked up in the string catalog, so uppercasing first
+    // would quietly opt these three labels out of translation.
+    private func statTile(_ label: LocalizedStringKey, value: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(label.uppercased())
+            Text(label)
                 .font(DesignTokens.Typography.statLabel)
                 .foregroundStyle(AppColors.textTertiary)
+                .textCase(.uppercase)
             Text(value)
                 .font(DesignTokens.Typography.pageTitle)
                 .foregroundStyle(AppColors.textPrimary)

@@ -55,3 +55,15 @@ A "Favorites Mode" toggle that serves only from the user's already-favorited quo
 ## Quick actions from the menu bar right-click menu
 
 Extend the right-click `NSMenu` in `MenuBarController` with "Copy Quote" and "Favorite This Quote" so common actions don't require opening the popover at all (Read Aloud already shipped there). Non-trivial part: `showContextMenu()` currently rebuilds the menu synchronously from `tracker.currentQuote`, but favoriting/copying needs to update state and (for copy) write to `NSPasteboard` while respecting the same `isFetching`/error-message invariants `PopoverContentView` already encodes — duplicating that logic outside SwiftUI risks it drifting out of sync with the view's behavior.
+
+## Activity over time in History's Insights
+
+The Insights panel breaks history down by source, author and tag, but says nothing about *when* any of it happened — no quotes-per-day chart, no current streak, no "you have been doing this for N weeks". Non-trivial part: every one of those needs calendar boundaries, and `Calendar.current`/`TimeZone.current` read ambient global state, which is exactly what a pure calculation must not do — they have to be injected the way `RecentQuoteFilter` injects `randomIndex`, with tests covering a day boundary and a DST change rather than only the happy path. On top of that, `QuoteRepository` still has no date-range query, so "the last 30 days" means aggregating the whole store in memory; issue #37 hits the same wall, and whichever lands first should own the query path rather than the two diverging.
+
+## Tapping an insight row filters the history list
+
+A source, author or tag row in Insights states a number and then does nothing with it — the obvious next move is clicking "Seneca · 9" and seeing those nine. Non-trivial part: `HistoryView`'s filtering vocabulary is currently a favorites flag plus a set of tag ids composed by `QuoteTagFilter`, and adding source and author predicates to that ad-hoc will produce a second, subtly different filter path next to the search work issue #37 is already going to add. The two need one shared pure predicate type agreed up front, not one each.
+
+## An incremental fast path for the history stats
+
+`QuoteTracker.setHistory` recomputes every tally from scratch whenever history changes, including the common case of exactly one quote being added to the front. Non-trivial part: an append-only update means keeping the tallies as mutable state rather than deriving them, which is precisely the staleness the current full recompute makes impossible — so it needs the tallies to live in one value type that knows how to fold a single snapshot in, kept pure and tested against the full recompute for equivalence, rather than counters sprinkled through an action.
