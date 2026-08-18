@@ -26,13 +26,19 @@ enum QuoteTextFormatter {
         return text
     }
 
+    /// What `authorDisplay` returns when there is no usable author. Exposed so
+    /// callers that need to exclude the unattributed can test for it without
+    /// repeating the literal — `QuoteHistoryStats` counts authors and must not
+    /// count this one as a person.
+    static let unknownAuthorDisplay = "Unknown"
+
     /// The author line shown under a quote. `nil`/empty/whitespace-only authors
     /// (and the literal placeholders some APIs use) all collapse to "Unknown".
     static func authorDisplay(_ author: String?) -> String {
-        guard let author else { return "Unknown" }
+        guard let author else { return unknownAuthorDisplay }
         let trimmed = author.trimmingCharacters(in: .whitespacesAndNewlines)
         let placeholders: Set<String> = ["", "unknown", "unknown author", "anonymous"]
-        return placeholders.contains(trimmed.lowercased()) ? "Unknown" : trimmed
+        return placeholders.contains(trimmed.lowercased()) ? unknownAuthorDisplay : trimmed
     }
 
     /// The full "— Author" attribution string.

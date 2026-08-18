@@ -2,8 +2,9 @@
 //  QuoteSnapshot.swift
 //  QuoteBar — Value types
 //
-//  Plain, `Sendable` value types that cross the boundary between persistence
-//  and the pure calculation layer.
+//  The plain, `Sendable` value type that crosses the boundary between
+//  persistence and the pure calculation layer. What the calculation layer
+//  produces from it lives in `QuoteHistoryStatsResult.swift`.
 //
 
 import Foundation
@@ -35,28 +36,4 @@ struct QuoteSnapshot: Equatable, Hashable, Sendable, Codable, Identifiable {
         self.isFavorite = isFavorite
         self.tags = tags
     }
-}
-
-/// Aggregate statistics derived from the full history. See
-/// `Shared/Logic/QuoteHistoryStats.swift` for how this is computed.
-struct QuoteHistoryStatsResult: Equatable, Sendable {
-    /// Total quotes seen, across all sources.
-    let totalSeen: Int
-
-    /// Number of sightings marked as a favorite.
-    let favoriteCount: Int
-
-    /// Number of distinct, non-empty authors seen.
-    let uniqueAuthorCount: Int
-
-    /// Sightings grouped by source, in `QuoteSource.allCases` order.
-    let countBySource: [QuoteSource: Int]
-
-    /// The zero value, used before any data has loaded.
-    static let empty = QuoteHistoryStatsResult(
-        totalSeen: 0,
-        favoriteCount: 0,
-        uniqueAuthorCount: 0,
-        countBySource: [:]
-    )
 }
