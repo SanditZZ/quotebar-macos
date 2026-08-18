@@ -37,21 +37,24 @@ enum QuoteSource: String, Codable, Sendable, CaseIterable, Identifiable {
     /// Short label for the source badge on the quote card.
     var badgeLabel: String {
         switch self {
-        case .onDeviceAI: return "AI"
-        case .zenQuotes, .dummyJSON: return "WEB"
-        case .bundled: return "OFFLINE"
-        case .custom: return "MINE"
+        case .onDeviceAI: return String(localized: "AI", comment: "Quote source badge, kept very short to fit the card")
+        case .zenQuotes, .dummyJSON: return String(localized: "WEB", comment: "Quote source badge, kept very short to fit the card")
+        case .bundled: return String(localized: "OFFLINE", comment: "Quote source badge, kept very short to fit the card")
+        case .custom: return String(localized: "MINE", comment: "Quote source badge for the user's own quotes, kept very short to fit the card")
         }
     }
 
     /// Full name for Settings and the history list.
     var displayName: String {
         switch self {
-        case .onDeviceAI: return "On-device AI"
+        case .onDeviceAI: return String(localized: "On-device AI")
+        // ZenQuotes and DummyJSON are the services' own names, so they stay
+        // as-is in every language — translating a brand would leave the user
+        // hunting for something that does not exist under that name.
         case .zenQuotes: return "ZenQuotes"
         case .dummyJSON: return "DummyJSON"
-        case .bundled: return "Bundled offline set"
-        case .custom: return "Your Quotes"
+        case .bundled: return String(localized: "Bundled offline set")
+        case .custom: return String(localized: "Your Quotes", comment: "The user's own added or imported quotes")
         }
     }
 

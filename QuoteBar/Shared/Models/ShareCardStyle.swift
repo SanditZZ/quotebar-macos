@@ -24,8 +24,8 @@ enum ShareCardStyle: String, Codable, Sendable, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .midnight: return "Midnight"
-        case .paper: return "Paper"
+        case .midnight: return String(localized: "Midnight", comment: "Dark share card style")
+        case .paper: return String(localized: "Paper", comment: "Light share card style")
         }
     }
 }

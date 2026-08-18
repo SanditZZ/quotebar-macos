@@ -53,24 +53,24 @@ enum MainMenu {
         let menu = NSMenu()
 
         menu.addItem(
-            withTitle: "About QuoteBar",
+            withTitle: String(localized: "About QuoteBar"),
             action: #selector(NSApplication.orderFrontStandardAboutPanel(_:)),
             keyEquivalent: ""
         )
         menu.addItem(.separator())
 
-        let settings = NSMenuItem(title: "Settings…", action: openSettings, keyEquivalent: ",")
+        let settings = NSMenuItem(title: String(localized: "Settings…"), action: openSettings, keyEquivalent: ",")
         settings.target = target
         menu.addItem(settings)
         menu.addItem(.separator())
 
         menu.addItem(
-            withTitle: "Hide QuoteBar",
+            withTitle: String(localized: "Hide QuoteBar"),
             action: #selector(NSApplication.hide(_:)),
             keyEquivalent: "h"
         )
         menu.addItem(
-            withTitle: "Quit QuoteBar",
+            withTitle: String(localized: "Quit QuoteBar"),
             action: #selector(NSApplication.terminate(_:)),
             keyEquivalent: "q"
         )
@@ -81,19 +81,19 @@ enum MainMenu {
 
     private static func editMenuItem() -> NSMenuItem {
         let item = NSMenuItem()
-        let menu = NSMenu(title: "Edit")
+        let menu = NSMenu(title: String(localized: "Edit", comment: "Edit menu in the menu bar"))
 
         // Undo and redo are not on a concrete class the way the clipboard
         // actions are; they are resolved through the responder chain by name.
-        menu.addItem(withTitle: "Undo", action: Selector(("undo:")), keyEquivalent: "z")
-        menu.addItem(withTitle: "Redo", action: Selector(("redo:")), keyEquivalent: "Z")
+        menu.addItem(withTitle: String(localized: "Undo", comment: "Edit menu command"), action: Selector(("undo:")), keyEquivalent: "z")
+        menu.addItem(withTitle: String(localized: "Redo", comment: "Edit menu command"), action: Selector(("redo:")), keyEquivalent: "Z")
         menu.addItem(.separator())
-        menu.addItem(withTitle: "Cut", action: #selector(NSText.cut(_:)), keyEquivalent: "x")
-        menu.addItem(withTitle: "Copy", action: #selector(NSText.copy(_:)), keyEquivalent: "c")
-        menu.addItem(withTitle: "Paste", action: #selector(NSText.paste(_:)), keyEquivalent: "v")
+        menu.addItem(withTitle: String(localized: "Cut", comment: "Edit menu command, the verb"), action: #selector(NSText.cut(_:)), keyEquivalent: "x")
+        menu.addItem(withTitle: String(localized: "Copy", comment: "Edit menu command, the verb"), action: #selector(NSText.copy(_:)), keyEquivalent: "c")
+        menu.addItem(withTitle: String(localized: "Paste", comment: "Edit menu command, the verb"), action: #selector(NSText.paste(_:)), keyEquivalent: "v")
         menu.addItem(.separator())
         menu.addItem(
-            withTitle: "Select All",
+            withTitle: String(localized: "Select All", comment: "Edit menu command"),
             action: #selector(NSText.selectAll(_:)),
             keyEquivalent: "a"
         )
@@ -104,10 +104,10 @@ enum MainMenu {
 
     private static func windowMenuItem() -> NSMenuItem {
         let item = NSMenuItem()
-        let menu = NSMenu(title: "Window")
+        let menu = NSMenu(title: String(localized: "Window", comment: "Window menu in the menu bar"))
 
         menu.addItem(
-            withTitle: "Minimize",
+            withTitle: String(localized: "Minimize", comment: "Window menu command"),
             action: #selector(NSWindow.performMiniaturize(_:)),
             keyEquivalent: "m"
         )
@@ -115,7 +115,7 @@ enum MainMenu {
         // window has none of — `BorderlessAppWindow` overrides it so this item
         // and Cmd+W both work.
         menu.addItem(
-            withTitle: "Close",
+            withTitle: String(localized: "Close", comment: "Window menu command, closes the front window"),
             action: #selector(NSWindow.performClose(_:)),
             keyEquivalent: "w"
         )
