@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- History has an Insights panel. The per-source counts the README has always promised were being calculated and then thrown away — they are now shown, as a share of everything you have seen, alongside the authors who come round most often and the tags you actually use. It sits collapsed under the three stat tiles, so the quote list keeps its room until you ask for the detail
+- The three stat tiles in History (Seen, Favorites, Authors) can now be translated. They were built from plain strings, which are never looked up in the string catalog, so they would have stayed English in every language
 - The interface is now ready to be translated. Every user-facing word in the app has been collected into a single string catalog, so adding a language is a matter of filling in translations rather than hunting through the code. The app still shows English everywhere, since no translations have been added yet
 - Menu bar items, window titles, the source badges on a quote card and the share style names can now be translated too. These were the parts that would have stayed stubbornly English even after a language was added. The names of the two quote services keep their own spelling in every language, since translating a service's name would only make it harder to recognise
 - Quote packs: a themed collection of quotes can now be installed from a file in Settings, under Quotes, and removed again later. Each pack states who maintains it and the license its quotes are under, and the app shows what is installed and how many quotes each one brought

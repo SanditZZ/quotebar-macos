@@ -24,6 +24,12 @@ struct HistoryView: View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.medium) {
             statsRow
 
+            // Nothing to break down before the first quote lands, and an empty
+            // disclosure row would only be something else to click on.
+            if tracker.stats.totalSeen > 0 {
+                HistoryInsightsView(stats: tracker.stats)
+            }
+
             HStack {
                 Toggle("Favorites only", isOn: $favoritesOnly)
                     .toggleStyle(.checkbox)

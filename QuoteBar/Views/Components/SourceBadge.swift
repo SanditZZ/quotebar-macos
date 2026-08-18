@@ -12,14 +12,7 @@ import SwiftUI
 struct SourceBadge: View {
     let source: QuoteSource
 
-    private var tint: Color {
-        switch source {
-        case .onDeviceAI: return AppColors.sourceAI
-        case .zenQuotes, .dummyJSON: return AppColors.sourceNetwork
-        case .bundled: return AppColors.sourceBundled
-        case .custom: return AppColors.sourceCustom
-        }
-    }
+    private var tint: Color { AppColors.sourceTint(for: source) }
 
     var body: some View {
         Label(source.badgeLabel, systemImage: source.symbolName)

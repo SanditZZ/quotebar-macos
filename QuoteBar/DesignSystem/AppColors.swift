@@ -56,6 +56,18 @@ enum AppColors {
     /// Badge tint for a quote from the user's own custom/imported library.
     static let sourceCustom = Color.pink
 
+    /// The tint for one provider tier. Shared by `SourceBadge` and by the
+    /// source breakdown in History, so a source is the same color wherever it
+    /// appears without either view owning the mapping.
+    static func sourceTint(for source: QuoteSource) -> Color {
+        switch source {
+        case .onDeviceAI: return sourceAI
+        case .zenQuotes, .dummyJSON: return sourceNetwork
+        case .bundled: return sourceBundled
+        case .custom: return sourceCustom
+        }
+    }
+
     // MARK: - Status
 
     /// Success / positive state.

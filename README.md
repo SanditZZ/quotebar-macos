@@ -29,7 +29,7 @@ Every quote is tagged with which of the four produced it, so the source badge on
 - **Menu bar native** — an accessory app with no Dock icon and no window in your way
 - **On-device AI, when available** — original quotes generated locally by Apple's Foundation Models framework; nothing leaves your Mac for this path
 - **Never empty-handed** — a four-tier fallback chain means a tap on **New Quote** always produces something, online or off
-- **History that persists** — every quote you've seen is kept, with favorites and per-source counts
+- **History that persists** — every quote you've seen is kept, with favorites, tags, and an Insights panel breaking it down by source, most-seen author and most-used tag
 - **Local and private** — a SwiftData-backed app that keeps everything on your Mac; the only network requests are the two quote API calls above, and only when the on-device model isn't available, plus the update check
 - **Updates itself** — checks once a day in the background via [Sparkle](https://sparkle-project.org) and offers a new version when there is one
 - **Launch at login** — switchable in Settings, via the system login items API

@@ -186,6 +186,21 @@ enum DesignTokens {
 
         /// Height of one sidebar tab row.
         static let sidebarRowHeight: CGFloat = 30
+
+        /// Height of the share bar under a source row in History's insights.
+        /// Thin on purpose — it is a proportion, not a control, and the row
+        /// already states the same number in words above it.
+        static let insightBarHeight: CGFloat = 5
+
+        /// Smallest width that bar is ever drawn at, so a source with a single
+        /// sighting out of thousands still leaves a visible mark rather than
+        /// rendering as nothing at all.
+        static let insightBarMinWidth: CGFloat = 3
+
+        /// Width reserved for the tally at the end of an insight row, so the
+        /// numbers line up down the column instead of ragging against
+        /// whatever label precedes them.
+        static let insightCountWidth: CGFloat = 32
     }
 
     // MARK: - Vibrancy
