@@ -21,8 +21,18 @@ final class QuoteTracker {
     /// fetch completes.
     private(set) var currentQuote: QuoteSnapshot?
 
-    /// Full seen-quote history, most recent first.
+    /// Full seen-quote history, most recent first. Assign through
+    /// `setHistory(_:)` rather than directly, so `stats` cannot fall behind it.
     private(set) var history: [QuoteSnapshot] = []
+
+    /// Aggregate statistics over `history`, recomputed only when history
+    /// changes. Deliberately stored rather than computed: it is read from
+    /// inside SwiftUI view bodies, which run on every redraw — every window
+    /// resize and every keystroke in a filter — and the aggregation walks the
+    /// whole store and sorts two ranked lists. Computing that per redraw would
+    /// scale with how long someone has been using the app, which is exactly
+    /// backwards.
+    private(set) var stats: QuoteHistoryStatsResult = .empty
 
     /// True while a new quote is being fetched.
     private(set) var isFetching = false
@@ -105,7 +115,7 @@ final class QuoteTracker {
         do {
             let snapshot = try repository.record(quote)
             currentQuote = snapshot
-            history.insert(snapshot, at: 0)
+            setHistory([snapshot] + history)
             errorMessage = nil
         } catch {
             AppLog.quote.error("[Quote] Failed to save fetched quote: \(error.localizedDescription, privacy: .public)")
@@ -129,7 +139,8 @@ final class QuoteTracker {
     /// part of the app changed something.
     func refresh() {
         do {
-            history = try repository.allQuotes()
+            let stored = try repository.allQuotes()
+            setHistory(stored)
             currentQuote = history.first
             errorMessage = nil
         } catch {
@@ -196,7 +207,10 @@ final class QuoteTracker {
 
     // MARK: - Calculations
 
-    var stats: QuoteHistoryStatsResult {
-        QuoteHistoryStats.compute(from: history)
+    /// The one place `history` is written. Keeps `stats` in step with it, so no
+    /// caller has to remember to — and so no view ever aggregates in its body.
+    private func setHistory(_ snapshots: [QuoteSnapshot]) {
+        history = snapshots
+        stats = QuoteHistoryStats.compute(from: snapshots)
     }
 }
