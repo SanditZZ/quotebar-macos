@@ -151,7 +151,8 @@ QuoteBar/
 │   ├── Services/                  QuoteProviderService + the four QuoteProvider implementations, AppSettings, LaunchAtLoginService
 │   └── Support/                   AppLog
 └── Resources/
-    └── BackupQuotes.json          The offline fallback set
+    ├── BackupQuotes.json          The offline fallback set
+    └── Localizable.xcstrings      String catalog: every user-facing string, ready to translate
 ```
 
 **Calculations** (`Shared/Logic/`) are pure functions over value types — no I/O, no SwiftData, no network. Every branch is unit-tested.

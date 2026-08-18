@@ -175,12 +175,12 @@ final class MenuBarController {
         // and clicking them does nothing at all.
         menu.autoenablesItems = false
 
-        menu.addItem(withTitle: "New Quote", action: #selector(requestNewQuoteFromMenu), keyEquivalent: "n")
+        menu.addItem(withTitle: String(localized: "New Quote"), action: #selector(requestNewQuoteFromMenu), keyEquivalent: "n")
             .target = self
         menu.addItem(.separator())
-        menu.addItem(withTitle: "History…", action: #selector(openHistory), keyEquivalent: "")
+        menu.addItem(withTitle: String(localized: "History…"), action: #selector(openHistory), keyEquivalent: "")
             .target = self
-        menu.addItem(withTitle: "Share Quote…", action: #selector(shareCurrentQuoteFromMenu), keyEquivalent: "")
+        menu.addItem(withTitle: String(localized: "Share Quote…"), action: #selector(shareCurrentQuoteFromMenu), keyEquivalent: "")
             .target = self
         menu.items.last?.isEnabled = tracker.currentQuote != nil
         menu.addItem(
@@ -189,15 +189,15 @@ final class MenuBarController {
             keyEquivalent: ""
         ).target = self
         menu.items.last?.isEnabled = tracker.isSpeaking || tracker.currentQuote != nil
-        menu.addItem(withTitle: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
+        menu.addItem(withTitle: String(localized: "Settings…"), action: #selector(openSettings), keyEquivalent: ",")
             .target = self
-        menu.addItem(withTitle: "Check for Updates…", action: #selector(checkForUpdatesFromMenu), keyEquivalent: "")
+        menu.addItem(withTitle: String(localized: "Check for Updates…"), action: #selector(checkForUpdatesFromMenu), keyEquivalent: "")
             .target = self
         // Sparkle ignores a second check while one is in flight, so the item
         // reflects that rather than looking like it did nothing.
         menu.items.last?.isEnabled = updateService.canCheck
         menu.addItem(.separator())
-        menu.addItem(withTitle: "Quit QuoteBar", action: #selector(quit), keyEquivalent: "q")
+        menu.addItem(withTitle: String(localized: "Quit QuoteBar"), action: #selector(quit), keyEquivalent: "q")
             .target = self
 
         // Attaching the menu makes the status item present it, then detaching

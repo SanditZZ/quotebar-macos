@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- The interface is now ready to be translated. Every user-facing word in the app has been collected into a single string catalog, so adding a language is a matter of filling in translations rather than hunting through the code. The app still shows English everywhere, since no translations have been added yet
+- Menu bar items, window titles, the source badges on a quote card and the share style names can now be translated too. These were the parts that would have stayed stubbornly English even after a language was added. The names of the two quote services keep their own spelling in every language, since translating a service's name would only make it harder to recognise
 - Quote packs: a themed collection of quotes can now be installed from a file in Settings, under Quotes, and removed again later. Each pack states who maintains it and the license its quotes are under, and the app shows what is installed and how many quotes each one brought
 - Quotes that arrive from a pack remember which pack they came from, so removing a pack takes away exactly its own quotes. Anything typed by hand is left alone, and so is a pack quote that was skipped on install because the same text was already in the library
 - An example pack of public-domain Stoic quotes ships in the repository, together with a section in the contributor guide covering the file format and the rule that a pack has to state a license

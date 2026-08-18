@@ -62,7 +62,7 @@ final class WindowCoordinator {
         }
 
         let window = makeWindow(
-            title: "Quote History",
+            title: String(localized: "Quote History", comment: "Title of the history window"),
             size: DesignTokens.Layout.historyWindowSize,
             minSize: DesignTokens.Layout.historyWindowMinSize,
             content: HistoryView(tracker: tracker, settings: settings, tagLibrary: tagLibrary)
@@ -81,7 +81,7 @@ final class WindowCoordinator {
         }
 
         let window = makeWindow(
-            title: "QuoteBar Settings",
+            title: String(localized: "QuoteBar Settings", comment: "Title of the settings window"),
             size: DesignTokens.Layout.settingsWindowSize,
             minSize: DesignTokens.Layout.settingsWindowMinSize,
             // Settings places the traffic lights in its own sidebar, so the

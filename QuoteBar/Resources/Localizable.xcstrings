@@ -1,0 +1,144 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%@ share style": {},
+    "%lld": {},
+    "%lld pack%@": {},
+    "%lld quote%@": {},
+    "%lld selected": {},
+    "A daily reminder that opens the popover and fetches a fresh quote when tapped.": {},
+    "AI": {
+      "comment": "Quote source badge, kept very short to fit the card"
+    },
+    "Aa": {},
+    "About QuoteBar": {},
+    "Add": {},
+    "Add to favorites": {},
+    "Author (optional)": {},
+    "Automatic": {},
+    "Bundled offline set": {},
+    "Cancel": {},
+    "Check Now": {},
+    "Check for Updates…": {},
+    "Clear": {},
+    "Clear History": {},
+    "Clear History…": {},
+    "Clear Tag Filter": {},
+    "Clear all quote history?": {},
+    "Close": {
+      "comment": "Window menu command, closes the front window"
+    },
+    "Copy": {
+      "comment": "Edit menu command, the verb"
+    },
+    "Cut": {
+      "comment": "Edit menu command, the verb"
+    },
+    "Delete": {},
+    "Delete %lld quote%@?": {},
+    "Delete tag %@": {},
+    "Delete: %@": {},
+    "Done": {},
+    "Edit": {
+      "comment": "Edit menu in the menu bar"
+    },
+    "Export JSON Backup…": {},
+    "Export Quotes as CSV…": {},
+    "Export a full backup (history and your quote library) as JSON, or just your quote library as CSV. Re-importing a JSON backup restores everything without duplicating what's already here.": {},
+    "Favorite": {},
+    "Favorite: %@": {},
+    "Favorites only": {},
+    "Fetching your first quote…": {},
+    "Hide QuoteBar": {},
+    "History isn't being saved right now.": {},
+    "History…": {},
+    "Import Backup…": {},
+    "Import…": {},
+    "Install Pack…": {},
+    "MINE": {
+      "comment": "Quote source badge for the user's own quotes, kept very short to fit the card"
+    },
+    "MIT licensed. No accounts, no analytics, no tracking beyond the two quote APIs described in SECURITY.md.": {},
+    "Midnight": {
+      "comment": "Dark share card style"
+    },
+    "Minimize": {
+      "comment": "Window menu command"
+    },
+    "New Quote": {},
+    "New tag": {},
+    "No packs installed. A pack is a themed collection of quotes you install from a file — its quotes join \"Your Quotes\" above.": {},
+    "No quote yet.": {},
+    "No tags yet": {},
+    "No tags yet.": {},
+    "Not selected": {},
+    "OFFLINE": {
+      "comment": "Quote source badge, kept very short to fit the card"
+    },
+    "Off": {},
+    "On": {},
+    "On-device AI": {},
+    "Paper": {
+      "comment": "Light share card style"
+    },
+    "Paste": {
+      "comment": "Edit menu command, the verb"
+    },
+    "Preferred source": {},
+    "Quit QuoteBar": {},
+    "Quote History": {
+      "comment": "Title of the history window"
+    },
+    "Quote text": {},
+    "QuoteBar": {},
+    "QuoteBar Settings": {
+      "comment": "Title of the settings window"
+    },
+    "Quotes stored": {},
+    "Record": {},
+    "Redo": {
+      "comment": "Edit menu command"
+    },
+    "Remove": {},
+    "Remove from favorites": {},
+    "Remove pack: %@": {},
+    "Rename tag %@": {},
+    "Select": {},
+    "Select All": {
+      "comment": "Edit menu command"
+    },
+    "Select: %@": {},
+    "Selected": {},
+    "Settings categories": {},
+    "Settings…": {},
+    "Share Quote…": {},
+    "Speech speed": {},
+    "Speed": {},
+    "System Default": {},
+    "Tag name": {},
+    "Tags for: %@": {},
+    "The database couldn't be opened, so nothing is being saved.": {},
+    "This cannot be undone.": {},
+    "This removes every saved quote and favorite. This cannot be undone.": {},
+    "Time": {},
+    "Undo": {
+      "comment": "Edit menu command"
+    },
+    "Used by the \"Read Aloud\" button in the popover and the menu bar's right-click menu.": {},
+    "Used when you share a quote as an image from the popover or the menu bar's right-click menu.": {},
+    "Version": {},
+    "View on GitHub": {},
+    "Voice": {},
+    "WEB": {
+      "comment": "Quote source badge, kept very short to fit the card"
+    },
+    "Window": {
+      "comment": "Window menu in the menu bar"
+    },
+    "Works system-wide, even while QuoteBar isn't in front. Opens the popover and fetches a new quote.": {},
+    "Your Quotes": {
+      "comment": "The user's own added or imported quotes"
+    }
+  },
+  "version": "1.0"
+}
